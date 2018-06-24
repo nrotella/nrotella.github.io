@@ -1,2 +1,3 @@
 name: Nick Rotella
 markdown: kramdown
+permalink: /blog/:year/:month/:day/:title
