@@ -17,10 +17,13 @@ Let's test some $$\LaTeX$$, shall we?
 
 $$\alpha = \dot{\theta}$$
 
-
-
+Here's a <a href="#test">link</a> which should scroll.
 
 ~~~ python
 for i in range(10):
     print('test')
 ~~~
+
+<nav id="test">
+Does this work?
+</nav>
