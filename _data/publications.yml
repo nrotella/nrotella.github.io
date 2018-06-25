@@ -1,0 +1,50 @@
+# List of publications to generate entries for:
+conference:
+- {title: 'Unsupervised Contact Learning for Humanoid Estimation and Control',
+authors: 'Nicholas Rotella, Stefan Schaal, Ludovic Righetti',
+conf: 'IEEE International Conference on Robotics and Automation (ICRA), 2018',
+url: 'https://arxiv.org/abs/1709.07472',
+pdf: 'https://arxiv.org/pdf/1709.07472.pdf',
+video: 'https://vimeo.com/249958881'}
+
+- {title: 'MPC Walking Framework With External Contact Forces',
+authors: 'Sean Mason, Nicholas Rotella, Stefan Schaal, Ludovic Righetti',
+conf: 'IEEE International Conference on Robotics and Automation (ICRA), 2018',
+url: 'https://arxiv.org/abs/1709.07472',
+pdf: 'https://arxiv.org/pdf/1709.07472.pdf'}
+
+- {title: 'Balancing and walking using full dynamics LQR control with contact constraints',
+authors: 'Sean Mason, Nicholas Rotella, Stefan Schaal, Ludovic Righetti',
+conf: 'IEEE International Conference on Robotics and Automation (ICRA), 2016',
+url: 'http://ieeexplore.ieee.org/document/7803255/',
+pdf: 'http://www-clmc.usc.edu/~nrotella/publications/Mason_ICHR2016.pdf'}
+
+- {title: 'Inertial sensor-based humanoid joint state estimation',
+authors: 'Nicholas Rotella, Sean Mason, Stefan Schaal, Ludovic Righetti',
+conf: 'IEEE International Conference on Robotics and Automation (ICRA), 2016',
+url: 'http://ieeexplore.ieee.org/document/7487328/',
+pdf: 'http://www-clmc.usc.edu/~nrotella/publications/Rotella_ICRA2016.pdf'}
+
+- {title: 'Humanoid momentum estimation using sensed contact wrenches',
+authors: 'Nicholas Rotella, Alexander Herzog, Stefan Schaal, Ludovic Righetti',
+conf: 'IEEE-RAS International Conference on Humanoid Robots (Humanoids), 2015',
+url: 'http://ieeexplore.ieee.org/document/7363417/',
+pdf: 'http://www-clmc.usc.edu/~nrotella/publications/Rotella_ICHR2015.pdf'}
+
+- {title: 'State estimation for a humanoid robot',
+authors: 'Nicholas Rotella, Michael Bloesch, Ludovic Righetti, Stefan Schaal',
+conf: 'IEEE/RSJ Conference on Intelligent Robots and Systems (IROS), 2014',
+url: 'http://ieeexplore.ieee.org/document/6942674/',
+pdf: 'http://www-clmc.usc.edu/~nrotella/publications/Rotella_IROS2014.pdf'}
+
+- {title: 'Properties of a temporal difference reinforcement learning brain machine interface driven by a simulated motor cortex',
+authors: 'Aditya Tarigoppula, Nick Rotella, Joseph T. Francis',
+conf: 'International Conference of the IEEE Engineering in Medicine and Biology Society (EMBC), 2012',
+url: 'http://ieeexplore.ieee.org/document/6346666/',
+pdf: 'http://www-clmc.usc.edu/~nrotella/publications/Rotella_EMBC2012.pdf'}
+
+- {title: 'Momentum control with hierarchical inverse dynamics on a torque-controlled humanoid',
+authors: 'Alexander Herzog, Nicholas Rotella, Sean Mason, Felix Grimminger, Stefan Schaal, Ludovic Righetti',
+conf: 'Autonomous Robots (AURO), 2015',
+url: 'http://link.springer.com/article/10.1007/s10514-015-9476-6',
+pdf: 'http://www-clmc.usc.edu/~nrotella/publications/Rotella_EMBC2012.pdf'}

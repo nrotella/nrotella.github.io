@@ -1,5 +1,6 @@
 /*
   Contents:
+    Publications
     Base
     Site container
     Masthead
@@ -12,6 +13,47 @@
     Tables
     Social media icons
 */
+
+/*
+  Publications
+*/
+
+.pub-content {
+    display: table;
+    background-color: #EEE;
+    margin-bottom: 50px;
+}
+
+.pub-img {
+    vertical-align: middle;
+    display: table-cell;
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    padding: 10px;
+}
+
+.pub-data {
+  vertical-align: middle;
+  display: table-cell;
+}
+
+.pub-icon {
+    color: salmon;
+    background-color: white;
+    border: 1px solid salmon;
+    padding: 5px;
+    -o-transition:.5s;
+    -ms-transition:.5s;
+    -moz-transition:.5s;
+    -webkit-transition:.5s;
+    transition: .5s;
+}
+
+.pub-icon:hover {
+    border: 5px solid salmon;
+}
+
 
 /*
   Base
@@ -55,12 +97,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 a {
-  text-decoration: underline;
-  color: #333;
+  text-decoration: none;
+  color: salmon;
 }
 
 a:hover {
-  color: black;
+  color: darksalmon;
   border-bottom: none;
 }
 
@@ -89,7 +131,7 @@ hr {
 .container {
   margin-left: auto;
   margin-right: auto;
-  width: 615px;
+  width: 800px;
 }
 
 /*48em*/
@@ -244,12 +286,29 @@ hr {
   background-color: #FFF;
   padding-top: 0.5rem;
   display: block;
+  transition: 0.5s;
+}
+
+.pub-icon {
+    color: salmon;
+    background-color: white;
+    border: 1px solid salmon;
+    padding: 5px;
+    -o-transition:.5s;
+    -ms-transition:.5s;
+    -moz-transition:.5s;
+    -webkit-transition:.5s;
+    transition: .5s;
+}
+
+.pub-icon:hover {
+    border: 5px solid salmon;
 }
 
 .sticky {
   position: fixed;
   top: 0;
-  width: 615px;
+  width: 800px;
 }
 
 .menu-content {
