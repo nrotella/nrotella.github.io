@@ -1,3 +1,51 @@
 ---
-layout: front
+layout: default
+title: Home
 ---
+
+<body>
+  <div class="about" id="about">
+    <h1>
+      About Me
+    </h1>
+    <img src="{{ site.github.url }}/assets/img/headshot.png" class="headshot">
+    <p>
+      I'm a roboticist currently working at Garmin on estimation and control for underactuated marine systems.  In early 2018, I completed my PhD in Computer Science in the Computational Learning and Motor Control (CLMC) Lab at the University of Southern California, in collaboration with the Autonomous Motion Department at the Max Planck Institute for Intelligent Systems.  My research focused on solving a broad range of problems in humanoid robotics; you can read about it in my thesis, Estimation-Based Control for Humanoid Robots.
+    </p>
+    <p>
+      Prior to defending my thesis, I earned a M.Sc. degree in Computer Science with a specialization  in Intelligent Robotics from USC in 2014.  My undergraduate studies earned me a B.Sc. degree in Mechanical Engineering with an emphasis on control systems from The Cooper Union for the Advancement of Science and Art in 2012. Having spent the summer of 2011 performing computational neuroscience research in the Joe Francis Lab at SUNY Downstate, I decided to pursue graduate studies in robotics as the field combined my interests in neuroscience and mechatronics.     
+    </p>
+  </div>
+</body>
+
+{% for post in paginator.posts %}
+<div class="posts">
+  <h1>
+    <a href="{{ site.github.url }}{{ post.url }}">{{ post.title }}</a>
+  </h1>
+  {% if post.image %}
+  <div class="thumbnail-container">
+    <a href="{{ site.github.url }}{{ post.url }}"><img src="{{ site.github.url }}/assets/img/{{ post.image }}"></a>
+  </div>
+  {% endif %}
+  <p>
+    {{ post.content | strip_html | truncate: 350 }} <a href="{{ site.github.url }}{{ post.url }}">Read more</a>
+    <span class="post-date"><i class="fa fa-calendar" aria-hidden="true"></i> {{ post.date | date_to_string }} - <i class="fa fa-clock-o" aria-hidden="true"></i> {% include read-time.html %}</span>
+  </p>
+</div>
+{% endfor %}
+
+<!-- Pagination links -->
+<div class="pagination">
+  {% if paginator.next_page %}
+    <a class="pagination-button pagination-active" href="{{ site.github.url }}{{ paginator.next_page_path }}" class="next">{{ site.data.settings.pagination.previous_page }}</a>
+  {% else %}
+    <span class="pagination-button">{{ site.data.settings.pagination.previous_page }}</span>
+  {% endif %}
+
+  {% if paginator.previous_page %}
+    <a class="pagination-button pagination-active" href="{{ site.baseurl }}{{ paginator.previous_page_path }}">{{ site.data.settings.pagination.next_page }}</a>
+  {% else %}
+    <span class="pagination-button">{{ site.data.settings.pagination.next_page }}</span>
+  {% endif %}
+</div>
