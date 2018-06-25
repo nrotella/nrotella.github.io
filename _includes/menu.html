@@ -1,10 +1,39 @@
-<div class="menu">
-  <nav class="menu-content">
+<div class="menu" id="menu">
+
+  <!-- sticky menu/nav bar at top of page -->
+  <script>
+  window.onscroll = function() {myFunction()};
+
+  var navbar = document.getElementById("menu");
+
+  var sticky = navbar.offsetTop;
+
+  function myFunction() {
+  if (window.pageYOffset >= sticky) {
+  navbar.classList.add("sticky")
+  } else {
+  navbar.classList.remove("sticky");
+  }
+  }
+  </script>
+
+  <nav class="menu-content" id="menu-content">
     {% for item in site.data.settings.menu %}
-      <a href="{{ site.github.url }}/{{ item.path }}/{{ item.url }}">{{ item.name }}</a>
+      <a href="{{ site.github.url }}/{{ item.url }}">{{ item.name }}</a>
     {% endfor %}
   </nav>
   <nav class="social-icons">
     {% include social-icons.html %}
   </nav>
 </div>
+
+
+<!-- enable smooth scrolling -->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js" type="text/javascript"></script>
+<script src="jquery.localscroll.js" type="text/javascript"></script>
+<script src="jquery.scrollTo.js" type="text/javascript"></script>
+<script type="text/javascript">
+  $(document).ready(function() {
+  $('#menu').localScroll({duration:10000});
+  });
+</script>
