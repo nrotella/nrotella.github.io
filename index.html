@@ -3,6 +3,11 @@ layout: default
 title: Home
 ---
 
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+
 <body>
   <div class="about" id="about">
     <h1>
@@ -18,12 +23,42 @@ title: Home
   </div>
 </body>
 
+
 <body>
-  <div class="publications" id="publications">
+  <div id="research">
+    <h1>
+      Research
+    </h1>
+</body>
+
+<body>
+  <div id="publications">
     <h1>
       Publications
     </h1>
-    Test
+    {% for pub in site.data.publications.conference %}
+    <div class="pub-content">
+      <div class="pub-img">
+	<img src="{{ site.github.url }}/assets/img/forest.jpg">
+      </div>
+      <div class="pub-data">
+	<h2 style="margin:5px;">
+	  <a href="{{ pub.url }}">{{ pub.title }}</a>
+	</h2>
+	<h3 style="margin:5px;">
+	  {{ pub.conf }}
+	</h3>
+	<h4 style="margin:10px;">
+	  {{ pub.authors }}
+	</h4>
+	<span class="pub-icon"><a href="{{ pub.url }}"><i class="fa fa-file-text-o fa-fw"></i>link</a></span>
+	<span class="pub-icon"><a href="{{ pub.pdf }}"><i class="fa fa-file-pdf-o fa-fw"></i>pdf</a></span>
+	{% if pub.video %}
+	<span class="pub-icon"><a href="{{ pub.video }}"><i class="fa fa-file-video-o fa-fw"></i>video</a></span>
+	{% endif %}
+      </div>
+    </div>
+    {% endfor %}
   </div>
 
 </body>

@@ -7,14 +7,15 @@ google-ID: 'UA-121354540-1'
 
 menu:
 - {name: 'About', url: 'index.html#about'}
+- {name: 'Research', url: 'index.html#research'}
 - {name: 'Publications', url: 'index.html#publications'}
-- {name: 'CV', url: '../download/CV.pdf'}
 - {name: 'Blog', url: 'menu/writing.html'}
+- {name: 'CV', url: '../download/CV.pdf'}
 
 # Available social icons are powered by Font Awesome, so you can use any icon that they offer
 social:
 - {icon: 'github', link: 'https://www.github.com/nrotella'}
-- {icon: 'linkedin', link: 'www.linkedin.com/in/nrotella'}
+- {icon: 'linkedin', link: 'http://www.linkedin.com/in/nrotella'}
 - {icon: 'envelope', link: 'mailto:nicholas.rotella@gmail.com'}
 #- {icon: 'rss-square', link: '/feed.xml'}
 # - {icon: 'rss-square', link: '/rss-feed.xml'}
