@@ -5,18 +5,25 @@
   window.onscroll = function() {myFunction()};
 
   var navbar = document.getElementById("menu");
-
+  var links = navbar.getElementsByTagName("a");
   var sticky = navbar.offsetTop;
 
   function myFunction() {
   if (window.pageYOffset >= sticky) {
-  navbar.classList.add("sticky")
+  navbar.classList.add("sticky");
   navbar.style.backgroundColor = "salmon";
-  navbar.style.color = "white";
+  for(var i=0;i<links.length;i++)
+		 {
+		 links[i].style.color ="white";
+		 }
+  navbar.a.style.color = "white";
   } else {
   navbar.classList.remove("sticky");
-  navbar.style.backgroundColor = "white";
-  navbar.style.color = "salmon";
+		 navbar.style.backgroundColor = "white";
+		   for(var i=0;i<links.length;i++)
+		 {
+		 links[i].style.color ="#999";
+		 }
   }
   }
   </script>

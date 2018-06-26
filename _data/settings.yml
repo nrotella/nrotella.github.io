@@ -10,7 +10,7 @@ menu:
 - {name: 'Research', url: 'index.html#research'}
 - {name: 'Publications', url: 'index.html#publications'}
 - {name: 'Blog', url: 'menu/writing.html'}
-- {name: 'CV', url: '../download/CV.pdf'}
+- {name: 'CV', url: '../download/NicholasRotellaCV.pdf'}
 
 # Available social icons are powered by Font Awesome, so you can use any icon that they offer
 social:

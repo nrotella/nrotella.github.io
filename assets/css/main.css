@@ -59,6 +59,11 @@
   Base
 */
 
+.center-image {
+    margin: 0 auto;
+    display: block;
+}
+
 .headshot {
     display: block;
     margin-left: auto;
@@ -317,7 +322,7 @@ hr {
 
 .menu-content a {
   color: #999;
-  font-size: 1rem;
+  font-size: 1.2rem;
   padding-right: 10px;
 }
 
