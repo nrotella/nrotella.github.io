@@ -139,6 +139,14 @@ hr {
   width: 800px;
 }
 
+
+.header-container {
+  margin-left: auto;
+  margin-right: auto;
+  width: 800px;
+  transition: 1.0s;
+}
+
 /*48em*/
 
 @media (max-width: 768px) {
@@ -291,7 +299,9 @@ hr {
   background-color: #FFF;
   padding-top: 0.5rem;
   display: block;
-  transition: 0.5s;
+  text-align: center;
+  width: 100%;
+  transition: 1.0s;
 }
 
 .pub-icon {

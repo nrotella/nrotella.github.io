@@ -5,6 +5,7 @@
   window.onscroll = function() {myFunction()};
 
   var navbar = document.getElementById("menu");
+  var header_container = document.getElementById("header-container");
   var links = navbar.getElementsByTagName("a");
   var sticky = navbar.offsetTop;
 
@@ -12,17 +13,21 @@
   if (window.pageYOffset >= sticky) {
   navbar.classList.add("sticky");
   navbar.style.backgroundColor = "salmon";
+  header_container.style.width = "100%"
   for(var i=0;i<links.length;i++)
 		 {
 		 links[i].style.color ="white";
+		 links[i].style.transition = "1.0s";
 		 }
   navbar.a.style.color = "white";
   } else {
-  navbar.classList.remove("sticky");
+		 navbar.classList.remove("sticky");
 		 navbar.style.backgroundColor = "white";
+		 header_container.style.width = "800px"
 		   for(var i=0;i<links.length;i++)
 		 {
 		 links[i].style.color ="#999";
+		 links[i].style.transition = "0.0s";
 		 }
   }
   }
