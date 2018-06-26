@@ -1,0 +1,3 @@
+{% for item in site.data.settings.academic %}
+<span class="pub-icon"><a href="{{ site.baseurl }}{{ item.link }}" target="_blank"><i class="ai ai-{{ item.icon }}" aria-hidden="true"></i>{{ item.name }}</a></span>
+{% endfor %}

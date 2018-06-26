@@ -8,11 +8,12 @@ title: Home
   window.location.href = '{{ github.site.url }}/index.html#';
   </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="assets/css/academicons.min.css"/>
 </head>
 
 
 <body>
-  <div class="about" id="about">
+  <div class="about anchor" id="about">
     <h1>
       About Me
     </h1>
@@ -28,7 +29,7 @@ title: Home
 
 
 <body>
-  <div id="research">
+  <div class="anchor" id="research">
     <h1>
       Research
     </h1> 
@@ -44,10 +45,11 @@ title: Home
 </body>
 
 <body>
-  <div id="publications">
+  <div class="anchor" id="publications">
     <h1>
       Publications
     </h1>
+    {% include academic-icons.html %}
     {% for pub in site.data.publications.conference %}
     <div class="pub-content">
       <div class="pub-img">
@@ -79,7 +81,7 @@ title: Home
 
 </body>
 
-<div id="recent_posts">
+<div class="anchor" id="recent_posts">
   <h1>
     Recent Posts:
   </h1>
