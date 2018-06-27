@@ -22,6 +22,7 @@ plugins:             [jekyll-paginate, jekyll-sitemap, jekyll-feed, jekyll-seo-t
 # Customise atom feed settings (this is where Jekyll-Feed gets configuration information)
 title:                     'Nick Rotella'
 description: <span>scientist<i class="fa fa-flask fa-fw"></i> engineer<i class="fa fa-gear fa-fw"></i> developer<i class="fa fa-code fa-fw"></i></span>
+description_plaintext: scientists/engineer/developerx
 author:              'Nick Rotella'
 
 # RSS 2.0 can be used instead of Atom by uncommenting following two lines
