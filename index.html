@@ -15,10 +15,10 @@ title: Home
     </h1>
     <img src="{{ site.github.url }}/assets/img/headshot.png" class="headshot">
     <p>
-      I'm a roboticist currently working at <a href="https://www.garmin.com/en-US/">Garmin</a> on estimation and control for underactuated marine systems.  In early 2018, I completed my PhD in Computer Science in the <a href="http://www-clmc.usc.edu/Main/HomePage">Computational Learning and Motor Control (CLMC) Lab</a> at the <a href="htp://www.usc.edu">University of Southern California</a>, in collaboration with the <a href="https://am.is.tuebingen.mpg.de/">Autonomous Motion Department</a> at the Max Planck Institute for Intelligent Systems.  My research focused on solving a broad range of problems in humanoid robotics; you can read about it in my thesis, Estimation-Based Control for Humanoid Robots.
+      I'm a roboticist currently working at <a href="https://www.garmin.com/en-US/" target="_blank">Garmin</a> on estimation and control for underactuated marine systems.  In early 2018, I completed my PhD in Computer Science in the <a href="http://www-clmc.usc.edu/Main/HomePage" target="_blank">Computational Learning and Motor Control (CLMC) Lab</a> at the <a href="htp://www.usc.edu" target="_blank">University of Southern California</a>, in collaboration with the <a href="https://am.is.tuebingen.mpg.de/ target="_blank"">Autonomous Motion Department</a> at the Max Planck Institute for Intelligent Systems.  My research focused on solving a broad range of problems in humanoid robotics; you can read about it in my thesis, <a href="{{ site.github.url }}/download/NicholasRotellaThesis.pdf" target="_blank">Estimation-Based Control for Humanoid Robots</a>.
     </p>
     <p>
-      Prior to defending my thesis, I earned a M.Sc. degree in Computer Science with a specialization  in Intelligent Robotics from USC in 2014.  My undergraduate studies earned me a B.Sc. degree in Mechanical Engineering with an emphasis on control systems from <a href="http://www.cooper.edu">The Cooper Union for the Advancement of Science and Art</a> in 2012. Having spent the summer of 2011 performing computational neuroscience research in the <a href="http://www.joefrancislab.com/">Joe Francis Lab</a> at SUNY Downstate, I decided to pursue graduate studies in robotics as the field combined my interests in neuroscience and mechatronics.
+      Prior to defending my thesis, I earned a M.Sc. degree in Computer Science with a specialization  in Intelligent Robotics from USC in 2014.  My undergraduate studies earned me a B.Sc. degree in Mechanical Engineering with an emphasis on control systems from <a href="http://www.cooper.edu" target="_blank">The Cooper Union for the Advancement of Science and Art</a> in 2012. Having spent the summer of 2011 performing computational neuroscience research in the <a href="http://www.joefrancislab.com/" target="_blank">Joe Francis Lab</a> at SUNY Downstate, I decided to pursue graduate studies in robotics as the field combined my interests in neuroscience and mechatronics.
     </p>
   </div>
 </body>
@@ -28,7 +28,16 @@ title: Home
   <div id="research">
     <h1>
       Research
-    </h1>
+    </h1> 
+    In addition to the <a href="#publications">publications</a> my collaborators and I authored on humanoid estimation and control, I spent a significant portion of my PhD working to improve both our locomotion codebase and performance of the real hardware.
+    <h2>
+      Quadratic Program-Based Inverse Dynamics
+    </h2>
+    <iframe src="https://player.vimeo.com/video/212661758" width="640" height="360" frameborder="0" allowfullscreen></iframe>
+    <h2>
+      Robust Joystick-Based Walking Controller
+    </h2>
+    <iframe src="https://player.vimeo.com/video/212661765" width="640" height="480" frameborder="0" allowfullscreen></iframe>
 </body>
 
 <body>
@@ -39,11 +48,15 @@ title: Home
     {% for pub in site.data.publications.conference %}
     <div class="pub-content">
       <div class="pub-img">
+	{% if pub.img %}
+	<img src="{{ site.github.url }}/assets/img/{{ pub.img }}">
+	{% else %}
 	<img src="{{ site.github.url }}/assets/img/forest.jpg">
+	{% endif %}
       </div>
       <div class="pub-data">
 	<h2 style="margin:5px;">
-	  <a href="{{ pub.url }}">{{ pub.title }}</a>
+	  <a href="{{ pub.url }}" target="_blank">{{ pub.title }}</a>
 	</h2>
 	<h3 style="margin:5px;">
 	  {{ pub.conf }}
@@ -51,10 +64,10 @@ title: Home
 	<h4 style="margin:10px;">
 	  {{ pub.authors }}
 	</h4>
-	<span class="pub-icon"><a href="{{ pub.url }}"><i class="fa fa-file-text-o fa-fw"></i>link</a></span>
-	<span class="pub-icon"><a href="{{ pub.pdf }}"><i class="fa fa-file-pdf-o fa-fw"></i>pdf</a></span>
+	<span class="pub-icon"><a href="{{ pub.url }}" target="_blank"><i class="fa fa-file-text-o fa-fw"></i>link</a></span>
+	<span class="pub-icon"><a href="{{ git.github.url }}/download/{{ pub.pdf }}" target="_blank"><i class="fa fa-file-pdf-o fa-fw"></i>pdf</a></span>
 	{% if pub.video %}
-	<span class="pub-icon"><a href="{{ pub.video }}"><i class="fa fa-file-video-o fa-fw"></i>video</a></span>
+	<span class="pub-icon"><a href="{{ pub.video }}" target="_blank"><i class="fa fa-file-video-o fa-fw"></i>video</a></span>
 	{% endif %}
       </div>
     </div>

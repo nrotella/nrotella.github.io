@@ -59,11 +59,16 @@
   Base
 */
 
+.center-image {
+    margin: 0 auto;
+    display: block;
+}
+
 .headshot {
     display: block;
     margin-left: auto;
     margin-right: auto;
-    width: 50%;
+    width: 30%;
 }
 
 body {
@@ -180,8 +185,8 @@ hr {
 }
 
 .thumbnail-container img{
-  margin-top: -11.5%;
-  margin-bottom: -11.5%;
+    /*margin-top: -11.5%;*/
+  margin-bottom: -20%;
 }
 
 /*
@@ -317,7 +322,7 @@ hr {
 
 .menu-content a {
   color: #999;
-  font-size: 1rem;
+  font-size: 1.2rem;
   padding-right: 10px;
 }
 
