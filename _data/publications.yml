@@ -4,15 +4,15 @@ conference:
 authors: 'Nicholas Rotella, Stefan Schaal, Ludovic Righetti',
 conf: 'IEEE International Conference on Robotics and Automation (ICRA), 2018',
 url: 'https://arxiv.org/abs/1709.07472',
-pdf: 'https://arxiv.org/pdf/1709.07472.pdf',
+pdf: 'Rotella_ICRA2018.pdf',
 img: 'friction_cone_cop_with_imu.svg',
 video: 'https://vimeo.com/249958881'}
 
-- {title: 'MPC Walking Framework With External Contact Forces',
+- {title: 'An MPC Walking Framework With External Contact Forces',
 authors: 'Sean Mason, Nicholas Rotella, Stefan Schaal, Ludovic Righetti',
 conf: 'IEEE International Conference on Robotics and Automation (ICRA), 2018',
 url: 'https://arxiv.org/abs/1709.07472',
-pdf: 'https://arxiv.org/pdf/1709.07472.pdf',
+pdf: 'Mason_ICRA2018.pdf',
 img: 'mpc_external.jpg'}
 
 - {title: 'Balancing and walking using full dynamics LQR control with contact constraints',
