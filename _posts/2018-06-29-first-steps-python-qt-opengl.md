@@ -3,7 +3,7 @@ layout: post
 title: "First Steps with python + Qt + OpenGL"
 author: "Nick Rotella"
 categories: journal
-tags: [python,qt,opengl,robotsim]
+tags: [tutorial,python,qt,opengl,robotsim]
 image: hello_opengl_cube_rotated.svg
 ---
 
@@ -433,7 +433,7 @@ which get updated from the sliders using the aforementioned setters
         self.rotY = val
 
     def setRotZ(self, val):
-        self.rotZ = np.pi * val
+        self.rotZ = val
 ```
 
 and then update the ```paintGL``` rendering code to use these angles to perform successive rotations of the cube around local axes (we'll go into rotations more in future posts, but the format is axis-angle):
