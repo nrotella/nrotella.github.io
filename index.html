@@ -4,6 +4,7 @@ title: Home
 ---
 
 <head>
+  <meta name="viewport" content="initial-scale=0.5, user-scalable=yes" \>
   <script>
   window.location.href = '{{ github.site.url }}/index.html#';
   </script>
@@ -37,18 +38,16 @@ title: Home
     <h3>
       A	Quadratic Program-Based Inverse Dynamics
     </h3>
-    <div class="video-responsive">
-      <script src="//f.vimeocdn.com/js/froogaloop2.min.js"></script>
-      <iframe id="vid1" class="center-image" src="https://player.vimeo.com/video/212661758?api=1&player_id=vimeo_player&autoplay=1&loop=1&muted=1" width="640" height="360" frameborder="0" allowfullscreen="allowfullscreen"></iframe>
-      <script type="text/javascript">
-	var iframe = $('#vid1')[0],
-	player = $f(iframe);
+    <script src="//f.vimeocdn.com/js/froogaloop2.min.js"></script>
+    <iframe id="vid1" class="center-image" src="https://player.vimeo.com/video/212661758?api=1&player_id=vimeo_player&autoplay=1&loop=1&muted=1" width="640" height="360" frameborder="0" allowfullscreen="allowfullscreen"></iframe>
+    <script type="text/javascript">
+      var iframe = $('#vid1')[0],
+      player = $f(iframe);
 
-	player.addEvent('ready', function() {
-	player.api('setVolume', 0);
-	});
-      </script>
-    </div>
+      player.addEvent('ready', function() {
+      player.api('setVolume', 0);
+      });
+    </script>
     <h3>
       Robust Joystick-Based Walking Controller
     </h3>
