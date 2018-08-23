@@ -30,7 +30,11 @@ If you're using Windows, as for many other python packages you can install PyQt4
 
 ### PyOpenGL
 
-There are also a number of different libraries for creating 3D graphics in python, however the most common cross-platform solution is OpenGL - specifically using the [PyOpenGL](http://pyopengl.sourceforge.net/){:target="_blank"} wrapper.  You should be able to install this easily with ```pip install pyopengl``` on linux or again using ```pip install``` on the wheel downloaded [here](https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyopengl){:target="_blank"}.
+There are also a number of different libraries for creating 3D graphics in python, however the most common cross-platform solution is OpenGL - specifically using the [PyOpenGL](http://pyopengl.sourceforge.net/){:target="_blank"} wrapper.  You should be able to install this easily with ```pip install pyopengl``` on linux or again using ```pip install``` on the wheel downloaded [here](https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyopengl){:target="_blank"}.  On Ubuntu 16.04, I found that instead of '''pip''' I had to use
+
+''' bash
+apt-get install python-qt4-gl
+'''
 
 PyQt uses the same system install of PyOpenGL in its [QtOpenGL](http://pyqt.sourceforge.net/Docs/PyQt4/qtopengl.html){:target="_blank"} module to provide a special OpenGL QWidget which allows easy interfacing.  More on this below.
 
