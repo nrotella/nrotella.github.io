@@ -234,12 +234,59 @@ The position is continuous, but the *velocity* is not - there are discrete jumps
 
 Sending a discontinuous command to a controller - in particular, the derivative (D) portion of a PID controller - can easily cause instability if gains are too high, forcing you to reduce the *bandwidth* of your controller to be robust to such jumps. Now we see that **the interpolation strategy you choose has a direct impact on how well you can track the desired motion!**
 
-For controlling a physical system, we usually desire an interpolation scheme which at least guarantees continuity up to acceleration. The mathematical term for this is $$C^{2}$$ *smoothness*, guaranteeing that two derivatives of $$f(t)$$ are continuous. The minimum order piecewise polynomial that we should consider is then *cubic*.
+For controlling a physical system, we usually desire an interpolation scheme which at least guarantees continuity up to acceleration. Why? I'm glad you asked.
 
-Enter the cubic spline.
+Because $$F=ma$$! Let's assume that the low-level control command we send to a robot is a force - think the lift force per rotor in a multirotor drone - then $$F=ma$$ tells us that if we know the desired acceleration of the center of mass of the robot $$a$$ and the robot's mass $$m$$, then we know how much total force $$F$$ we need to send. This is a *second-order* system, meaning that its dynamics are written on the level of accelerations (some form of $$F=ma$$) - which is the case for many physical systems. Of course, it all depends how we want to model the system, which depends on what the low-level control command we send is; for example, in a multirotor system we might send force commands at some level, but beneath this is a controller which maps force to motor current. If we model our system with current as the input, we'll get a higher-order system than second-order, but typically we would choose to stack a force controller on top of a motor current controller rather than build the dynamics of the rotors themselves into our system model.  This is a discussion about control system design, which we're not going to go into any further for now.  
+
+The mathematical term for second-order continuity of derivatives is $$C^{2}$$ *smoothness*, meaning that two derivatives of $$f(t)$$ are continuous. The minimum order piecewise polynomial that we should consider is then *cubic*. Enter the cubic spline.
+
+You've probably heard of splines before (anyone else remember SimCity 2000's mockumathematical *reticulating splines* loading step?) but maybe you don't understand what they are. You may have even used them for something (they're very popular in graphics as well) but all the math was hidden within the library you used.  It turns out that (a) they're fairly simple (b) they avoid all the issues with interpolation we've encountered thus far and (c) they can be solved for very efficiently using linear algebra.
 
 ## Cubic splines
 
-You've probably heard of splines before (anyone else remember SimCity 2000's mockumathematical *reticulating splines* loading step?) but maybe you don't understand what they are. You may have even used them for something (they're very popular in graphics as well) but all the math was hidden within the library you used.  It turns out that (a) they're fairly simple (b) they avoid all the issues with interpolation we've encountered thus far and (c) they can be solved for very efficiently using linear algebra. In the next post in this series, we'll work through their derivation and some examples.
+As discussed above, instead of a single interpolating polynomial of order $$N-1$$, we can find a set of *piecewise* interpolating polynomials of lower order.  The order of polynomial to be used depends on the desired properties of the interpolant; typically, this means continuity of derivatives of up to a certain order. For example, the piecewise linear trajectory we introduced above is $$C^{0}$$ smooth; a piecewise quadratic is $$C^{1}$$ smooth; a piecewise cubic is $$C^{2}$$ smooth and so on.  Since physical systems are usually second-order, piecewise cubic polynomials are often a good choice - though for higher orders of smoothness piecewise quintic (fifth-order) polynomials are sometimes used. 
 
+A *spline* is nothing more than a collection of piecewise polynomials of a certain order (cubic, quintic, etc) with derivative continuity enforced at interior waypoints and boundary conditions enforced at the ends. We won't go through the full derivation here, but instead set up the problem and discuss the solution.
 
+A piecewise cubic function $$f(t)$$ interpolating $$N$$ waypoints at times $$\{t_{0}, t_{1}, \cdots t_{N-1}\}$$ can be written as a set of $$M=N-1$$ cubic polynomials
+
+$$
+f(t) = 
+\begin{cases}
+f_{1}(t) = c_{0,1} + c_{1,1}t + c_{2,1}t^{2} + c_{3,1}t^{3} & t\in [t_{0}, t_{1}]\\
+f_{2}(t) = c_{0,2} + c_{1,2}t + c_{2,2}t^{2} + c_{3,2}t^{3} & t\in [t_{1}, t_{2}]\\
+\vdots & \vdots\\
+f_{M}(t) = c_{0,N-1} + c_{1,M}t + c_{2,M}t^{2} + c_{3,M}t^{3} & t\in [t_{M-1}, t_{M}]\\
+\end{cases}
+$$
+
+This piecewise interpolating polynomial is subject to continuity constraints of zeroth, first and second orders at all interior waypoints (called *knots*), resulting in a total of $$3(M-1)$$ constraints, as well as interpolation constraints which ensure the function $$f(t)$$ passes through the waypoints at the specified time (resulting in $$M+1$$ more constraints).  This yields a total of $$4M-2$$ constraints with a total of $$4M$$ coefficients - two more constraints are needed!
+
+There are a number of different ways to specify the remaining two constraints required to solve the interpolation problem, but among the most popular are:
+
+ * Natural boundary conditions - end knots have zero second derivative
+ * Specified boundary conditions - the second derivative at each end knot is a specified value
+ * Not-a-knot - the first and last interior knots have further continuity of third derivatives, which for a cubic polynomial means that $$f_{1}(t)=f_{2}(t)$$ and $$f_{M-1}(t)=f_{M}(t)$$ and hence these knots are effectively *not knots*, since the functions surrounding them must be identical
+ * Clamped boundary conditions - the first derivative at the end knots is zero
+ * Complete boundary conditions - the first derivative at each end knot is a specified value
+
+Given the interpolation and continuity constraints plus additional boundary conditions, the cubic spline interpolation problem is written in matrix form as a *tridiagonal* matrix which can be efficiently solved using a [TDMA (Tridiagonal Matrix Algorithm)}(https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm) solver. Thus, not only are splines very flexible, but they're very fast to compute!
+
+For in-depth details on putting the above problem into the form of a tridagonal matrix system (lots of algebra!)see [this paper](https://www.math.uh.edu/~jingqiu/math4364/spline.pdf) for an excellent summary. Also, keep in mind that this is just one way (probably the most straightforward to understand) to set up the spline problem; in practice, many libraries use [B-splines](https://en.wikipedia.org/wiki/B-spline) which are *basis functions* for splines of a particular degree (meaning that any spline of that degree can be respresented as a linear combination of B-splines). This reduces the problem to solving for the coefficients in the B-spline basis, but the result is the same.
+
+### Removing the dependence on time
+
+The way in which we specify splines as waypoints at specific times (which implicitly imposes derivative information) means that the resulting trajectory is a function of time.  This may not be the desired goal - for example, consider the problem of moving through waypoints at a desired (and even variable) *speed* rather than at specified times. This is somewhat like an amusement park ride in which the vehicle follows rails but allows the rider to control the speed. Not super common in practical applications, but it's something I've encountered and the solution is interesting.
+
+The speed and acceleration along a spline determined by waypoints at specific times are certainly non-constant; these derivatives vary along the trajectory to ensure smoothness in interpolation.  How do we instead generate a smooth trajectory to be followed at a specified speed without explicit timing information?
+
+The proper way to accomplish this is to re-parameterize the spline in terms of *arclength* (distance traveled along the spline) rather than in terms of time.  The spline can then be followed at a constant, desired *arclength rate of change* aka speed along a trajectory.  Unfortunately, this re-parameterization cannot be done in closed-form; there are a number of ways to accomplish this (see [this paper](https://www.geometrictools.com/Documentation/MovingAlongCurveSpecifiedSpeed.pdf) for a great explanation) but the general algorithm is as follows:
+
+ 1. Build a spline without specified waypoint times, for example spacing waypoints apart by one second nominally
+ 2. Sample the spline at many times in the nominal range
+ 3. Compute cumulative arclength along the curve by computing distances between the sampled points (assuming they are line segments)
+ 4. Fit a piecewise linear (or higher order) function relating arclength to sample time points
+ 5. For an input time $$t$$ and desired speed along the curve $$v_{des}$$, compute the desired arclength as $$s=t*v_{des}$$ and use the linear fit to find the corresponding time $$\tilde{t}$$
+ 6. Return the spline sampled at $$\tilde{t}$$ which, for a series of times, should yield an arclength rate of change of $$v_{des}$$
+
+This method is seen to work quite well, and will work even better if the spline is sampled at a finer resolution and higher-order piecewise fit is used in the fourth step.  Alternatively, a simple method is to build a spline normally but first determine the waypoint times from the specified $$v_{des}$$ in such a way that the *average* velocity along the curve per segment is $$v_{des}$$.  This can be combined with the more exact approach above by using this idea to build a spline in the first step (rather than using nominal waypoint timings).  This improvement should help ensure that sampling the spline at regular intervals in step two will yield a good approximation for the fit in step four.
