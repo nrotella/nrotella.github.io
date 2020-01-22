@@ -4,7 +4,7 @@ title: "Initial Simulator Graphics in OpenGL"
 author: "Nick Rotella"
 categories: journal
 tags: [tutorial,python,qt,opengl,robotsim]
-image: hello_opengl_cube_rotated.svg
+image: opengl_grid.png
 ---
 
 In this tutorial, we'll pick up where we left off on incrementally writing a simple robot simulator in python using Qt and OpenGL. Last time, we discussed how to install these libraries and walked through a simple interactive cube GUI; check out the previous tutorial or find the script [here](../download/HelloOpenGL.py).
@@ -291,9 +291,24 @@ The main function we need to add to our class is one which updates the camera vi
 
 In OpenGL, the camera view is set with ```gluLookAt(eyeX,eyeY,eyeZ,centerX,centerY,centerZ,upX,upY,upZ)``` where the eye is the camera position, the center is the focal point and the up vector fixes the camera orientation.
 
-We choose to adjust the camera in a *spherical* coordinate frame with the origin as the fixed center (focal) point because it's easy and feels natural, though there are certainly other ways to define an adjustable camera in 3D space. The spherical camera coordinates are radius, azimuth angle $$\theta$$ and elevation angle $$\phi$$.
+We choose to adjust the camera in a *spherical* coordinate frame with the origin as the fixed center (focal) point because it's easy and feels natural, though there are certainly other ways to define an adjustable camera in 3D space. The spherical camera coordinates are radius (distance from origin/center) $$r$$, azimuth angle $$\theta$$ and elevation angle $$\phi$$ as shown below.
 
-We thus convert the camera's current spherical coordinates to Cartesian coordinates
+![camera_spherical_to_cartesian.svg](../assets/img/camera_spherical_to_cartesian.svg "Camera Spherical to Cartesian Conversion"){: .center-image}
+
+We thus convert the camera's current spherical coordinates to Cartesian coordinates using the formula
+
+$$
+p_{eye} =
+\begin{bmatrix}p_{eye_{x}}\\p_{eye_{y}}\\p_{eye_{z}}\end{bmatrix}
+=
+\begin{bmatrix}
+r\sin{\phi}\cos{\theta}\\
+r\sin{\phi}\sin{\theta}\\
+r\cos{\phi}
+\end{bmatrix}
+$$
+
+which is implemented as
 
 ```python
         self.eye_pos = np.array([self.eye_r*np.sin(self.eye_phi)*np.cos(self.eye_th),
@@ -301,7 +316,7 @@ We thus convert the camera's current spherical coordinates to Cartesian coordina
                                  self.eye_r*np.cos(self.eye_phi)])
 ```
 
-then simply pass the eye position, fixed center position and "up" vector ```up_vec``` (which just points in +z) to ```gluLookAt``` with a concatenation to join the numpy arrays and an asterisk to unpack them to the required individual arguments:
+We then simply pass the eye position, fixed center position and "up" vector ```up_vec``` (which just points in +z) to ```gluLookAt``` with a concatenation to join the numpy arrays and an asterisk to unpack them to the required individual arguments:
 
 ```python
         up_vec = np.array([0.0, 0.0, 1.0])
@@ -381,7 +396,7 @@ One final required addition is to set the initial camera state, since we adjust 
 
 We also set the focus to the window to ensure our keypresses take effect. That's it! Run the script and use the keys to manipulate the camera and view the ground plane as below.
 
-INSERT GIF HERE
+![opengl_grid.gif](../assets/gif/opengl_grid.gif "OpenGL Grid"){: .center-image}
 
 # Vector and Axes graphics
 
@@ -489,7 +504,7 @@ self.origin_axes_graphics.render(np.identity(3), np.zeros(3))
 
 Run the simulator script should now produce the ground plane with axes graphics visualizing the global coordinate frame.
 
-INSERT GIF HERE
+![opengl_grid_axes.gif](../assets/gif/opengl_grid_axes.gif "OpenGL Grid and Axes"){: .center-image}
 
 # Wrapping up
 
