@@ -4,7 +4,7 @@ title: "3D Geometry for Robotics"
 author: "Nick Rotella"
 categories: journal
 tags: [tutorial,python,qt,opengl,robotsim]
-image: opengl_grid.png
+image: ARM.svg
 ---
 
 In order to proceed with writing a simple robot simulator, there are a number of mathematical concepts that must be introduced before we can describe the motion of a manipulator.
@@ -269,6 +269,8 @@ Successive homogeneous transformations are composed in the same manner as for ro
 $$
 \tilde{p}^{0} = A_{1}^{0}A_{2}^{1}\cdots A_{n}^{n-1}\tilde{p}^{n}
 $$
+
+![multiple_transforms.svg](../assets/img/multiple_transforms.svg "Successive homogeneous transformations relative to intermediate frames"){: .center-image}
 
 As before, note that post-multiplication is used because these matrices are all defined with respect to the preceding frame in the chain - this will be useful in defining a systematic way to transform between links of a robot manipulator. When transformations are all defined relative to the same fixed frame, we pre-multiply them as was done for pure rotations above.
 
