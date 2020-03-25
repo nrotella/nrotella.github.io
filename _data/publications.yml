@@ -6,8 +6,7 @@ conf: 'IEEE International Conference on Robotics and Automation (ICRA), 2018',
 url: 'https://arxiv.org/abs/1709.07472',
 pdf: 'Rotella_ICRA2018.pdf',
 img: 'friction_cone_cop_with_imu.svg',
-video: 'https://vimeo.com/249958881'}
-# ICRA spotlight video: https://www.youtube.com/watch?v=zZcNos2tyPc
+video: 'https://www.youtube.com/watch?v=zZcNos2tyPc'}
 
 - {title: 'An MPC Walking Framework With External Contact Forces',
 authors: 'Sean Mason, Nicholas Rotella, Stefan Schaal, Ludovic Righetti',
