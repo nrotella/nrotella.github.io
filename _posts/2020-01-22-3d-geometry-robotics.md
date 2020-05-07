@@ -11,6 +11,8 @@ In order to proceed with writing a simple robot simulator, there are a number of
 
 In this post, I'll be pulling sections from [my PhD notes](https://nrotella.github.io/download/NicholasRotellaPhDNotes.pdf) which, in turn, were largely taken from the excellent introductory text [Modeling and Control of Robot Manipulators](https://www.springer.com/gp/book/9781852332211).
 
+The resulting simple geometry module introduced at the end of this post can be found [in this GitHub commit](https://github.com/nrotella/python-robot-sim/commit/7a55009d53c1104a78293ce11a230fd8e13b2ea5).
+
 * Table of contents:
 {:toc}
 
@@ -274,6 +276,295 @@ $$
 
 As before, note that post-multiplication is used because these matrices are all defined with respect to the preceding frame in the chain - this will be useful in defining a systematic way to transform between links of a robot manipulator. When transformations are all defined relative to the same fixed frame, we pre-multiply them as was done for pure rotations above.
 
+# Python geometry module
+
+Now that we've introduced homogeneous transformations to represent rigid body pose, let's start to implement a basic geometry module which we'll call ```geometry.py```. The following is the first-pass at a ```HomogeneousTransform``` class which allows for simple representation and manipulation of a rigid body pose:
+
+```python
+class HomogeneousTransform(object):
+    """ 
+    Class implementing a three-dimensional homogeneous transformation.
+
+    This class implements a homogeneous transformation, which is the combination of a rotation R 
+    and a translation t stored as a 4x4 matrix of the form: 
+    
+    T = [R11 R12 R13 t1x
+         R21 R22 R23 t2
+         R31 R32 R33 t3
+         0   0   0    1]
+
+    Transforms can operate directly on homogeneous vectors of the form [x y z 1] using matrix 
+    math. Defaults to the identity transformation if no rotation/translation are specified. The
+    transformation can be accessed as either a rotation/translation or matrix via attributes which
+    are kept in sync as the transformation is updated
+
+    Attributes:
+        matrix (4x4 numpy array): The homogeneous transformation as a matrix.
+
+    """
+
+    def __init__(self, rotation=None, translation=None, matrix=None):
+        """ 
+	Initialize a homogeneous transformation.
+
+        "Overloaded" constructor which initializes a transformation object from either a 4x4 
+        matrix OR the combination of a rotation matrix and translation vector. If all three 
+        inputs are None, the default is the identity transformation.
+
+   	Args:			
+            rotation (3x3 numpy array): Rotation matrix.
+            translation (3x1 numpy array): Translation vector.
+            matrix (4x4 numpy array): Homogeneous transformation matrix.
+ 
+	"""
+        if matrix is not None:
+            self._mat = matrix
+
+        else:
+            if rotation is None:
+                rotation = np.identity(3)
+
+            if translation is None:
+                translation = np.zeros((3,1))
+            
+            self.set(rotation, translation)
+
+            
+    def __mul__(self, other):
+        """
+        Multiplies HomogeneousTransform objects using their underlying matrices.
+
+        Args:
+            other (HomogeneousTransform): Right-hand-side transform to multiply.
+
+        Returns:
+            (HomogeneousTransform): Resultant composed homogeneous transformation.
+    
+        """
+        return HomogeneousTransform(matrix=self._mat.dot(other.mat))
+
+        
+    @property
+    def mat(self):
+        return self._mat
+
+
+    @mat.setter
+    def mat(self, value):
+        self._mat = value
+
+    
+    def set(self, rotation, translation):
+        """ Set the transformation's rotation and translation.
+
+        Args:
+            rotation (3x3 numpy array): Rotation matrix.
+            translation (3x1 numpy array): Translation vector.
+
+        Returns:
+            (None)
+        
+        """
+        self._mat = np.block([
+            [rotation, translation.reshape(3,1)],
+            [np.zeros((1,3)), 1.0]
+        ])
+        
+    def inv(self):
+        """ Returns the inverse of the homogeneous transformation.
+
+        Args:
+            (None)
+
+        Returns:
+            (HomogeneousTransform): Inverse homogeneous transformation.
+
+        """
+        R = self._mat[:3,:3].T
+        t = -(self._mat[:3,:3].T).dot(self._mat[:3,3])
+        return HomogeneousTransform(rotation=R, translation=t)
+
+    
+    def R(self):
+        """ Returns the rotation portion of the transformation.
+
+        Args:
+            (None)
+
+        Returns:
+            (3x3 numpy array): Rotation matrix.
+                
+        """
+        return self._mat[:3,:3]
+
+    
+    def Rx(self):
+        """ Returns the x-axis of the rotation portion of the transformation.
+
+        Args:
+            (None)
+
+        Returns:
+            (3x1 numpy array): Rotation matrix x-axis vector.
+                
+        """
+        return self._mat[:3,0]
+
+    
+    def Ry(self):
+        """ Returns the y-axis of the rotation portion of the transformation.
+
+        Args:
+            (None)
+
+        Returns:
+            (3x1 numpy array): Rotation matrix y-axis vector.
+                
+        """
+        return self._mat[:3,1]
+
+    
+    def Rz(self):
+        """ Returns the z-axis of the rotation portion of the transformation.
+
+        Args:
+            (None)
+
+        Returns:
+            (3x1 numpy array): Rotation matrix z-axis vector.
+                
+        """
+        return self._mat[:3,2]
+
+    
+    def t(self):
+        """ Returns the translation portion of the transformation.
+
+        Args:
+            (None)
+
+        Returns:
+            (3x1 numpy array): Translation vector.
+                
+        """
+        return self._mat[:3,-1]
+
+    
+    def tx(self):
+        """ Returns the x component of the translation portion of the transformation.
+
+        Args:
+            (None)
+
+        Returns:
+            (float): Translation vector.
+                
+        """
+        return self._mat[0,-1]
+
+    
+    def ty(self):
+        """ Returns the y component of the translation portion of the transformation.
+
+        Args:
+            (None)
+
+        Returns:
+            (float): Translation vector.
+                
+        """
+        return self._mat[1,-1]
+
+    
+    def tz(self):
+        """ Returns the z component of the translation portion of the transformation.
+
+        Args:
+            (None)
+
+        Returns:
+            (float): Translation vector.
+                
+        """
+        return self._mat[2,-1]
+
+```
+
+This class stores the transformation internally as a ```numpy``` matrix but provides direct access to the rotation and translation components as needed for general use. The inverse transformation is computed as introduced in the theory above, and multiplication has been overloaded for composing successive transformations.
+
+This is by no means a complete homogeneous transformation class; we'll expand it in future posts as needed. Rotations in particular can be *very* tricky, though, and adding new functionality to this geometry module could mean that we accidentally break old functionality. For this reason, let's quickly introduce **unit tests** in our python project.
+
+## Unit testing
+
+First of all: **what is a unit test?** Very simply, it's a layer of software testing which ensures that a small piece of code (or *unit*, for example a single function/method) generates an expected output for a known input. This allows us to test that low-level functionality of code does not change in unexpected ways as the codebase evolves. Unit tests are often run automatically on the server containing the codebase whenever new changes are pushed to ensure nothing has broken. 
+
+![unittesting.jpg](../assets/img/unittesting.jpg "Software testing levels (source: http://softwaretestingfundamentals.com/unit-testing/)"){: .center-image width="200px"}
+
+Unit testing is just one level (the lowest) of software testing; after testing individual units, we can test them in groups for integration and then system level testing and so on.
+
+There are a couple of ways to implement unit tests in python, including the built-in [unittest](https://docs.python.org/2/library/unittest.html) framework and the popular [pytest](https://docs.pytest.org/en/latest/) framework. We'll stick with ```pytest``` here as it seems to be the more popular choice as of this writing.
+
+First, we need to create a ```test``` directory inside the project, and add a blank initialization file to it:
+
+```
+cd MY_PROJECT
+mkdir test
+touch test/__init__.py
+```
+
+Now, we add a file called ```test_MY_UNIT.py``` where ```MY_UNIT``` describes whatever you'll be testing - for example, we'll add ```test_geometry.py``` for geometry module tests. In that file, we add the following:
+
+```python
+#!/usr/bin/env/python
+
+import pytest
+
+from geometry import HomogeneousTransform
+from scipy.stats import special_ortho_group
+import numpy as np
+
+def test_homogeneous_transform():
+    """
+    Test inversion and multiplication of HomogeneousTransform objects.
+    
+    Test that a random HomogeneousTransform object T1 returns the 4x4 identity matrix when
+    multiplied by its inverse transform, T1.inv().
+
+    """
+    R = special_ortho_group.rvs(3)
+    t = np.random.rand(3,1)
+    T1 = HomogeneousTransform(R, t)
+
+    result = T1.inv() * T1
+
+    np.testing.assert_array_almost_equal(result.mat, np.identity(4))
+```
+
+Here we added a single unit test for the ```HomogeneousTransform``` class which checks that a randomly-generated transform, multiplied by its inverse, results in (something [very close](https://docs.scipy.org/doc/numpy/reference/generated/numpy.testing.assert_array_equal.html) to) the identity transformation. This is just one example of a decently-comprehensive unit test for this class: it involves initialization of an object, inversion of its transform and overloaded multiplication.
+
+To run this test - and any others we add later in new ```test_MY_MODULE.py``` files in the ```test/``` directory, we simply run
+
+```
+cd MY_PROJECT
+pytest
+```
+
+That's it! You should see some output confirming that the test passed. Yay!
+
+## Aside: switch to python3 (if you haven't already)
+
+To take advantage of some python3-specific unit testing features, we need to ensure the existing python simulator runs with ```python3``` instead of ```python2```. First, we make sure ```python3``` is the default (assuming it's installed already) by adding the line
+
+```bash
+alias python=python3
+```
+
+To the ```.bashrc``` file. Re-source this file again and subsequent calls to python should call ```python3```. Next, we need to install some python3 versions of Qt and OpenGL as follows:
+
+```bash
+sudo apt-get install python3-pyqt4 python3-qt4-gl python3-pyqt4.qtopengl python3-opengl 
+```
+
 # Wrapping up
 
-We introduced the basics for 3D geometry, including rotations, translations and homogeneous transforms. Next time, we'll build on this foundation to derive the kinematics of arbitrary robot manipulators.
+We introduced the basics for 3D geometry, including rotations, translations and homogeneous transforms.  We then wrote a simple geometry module containing a homogeneous transformation class and a unit test for it. Next time, we'll build on this foundation to derive the kinematics of arbitrary robot manipulators and implement a python kinematics module.
