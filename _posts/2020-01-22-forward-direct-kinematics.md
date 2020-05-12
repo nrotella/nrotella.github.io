@@ -12,19 +12,23 @@ In this series of tutorials, we'll go over the basics of manipulator robot kinem
 * Table of contents:
 {:toc}
 
-# Motivation
+# The Fixed-Base Manipulator
 
-A robotics manipulator consists of a series of rigid bodies or *links*
-connected by means of *joints*.  Joints can be of two types:
-*revolute* (rotational) and *prismatic* (translational).  The entire
-structure of the manipulator is formed by the links and joints and is known as a
-*kinematic chain*.  One end of the chain is constrained to a *base*
-while the other end is usually connected to an *end-effector* for
-manipulation of objects in space.
+Let's begin by introducing the type of robot we'll initially be modeling and controlling in our simulator - a **fixed-base manpulator**.
 
+The robot consists of a chain of rigid **links** connected by controllable **joints** - typically electric motors or pneumatic/hydraulic piston linkages.  One end of the chain is constrained to a **base** - for example, rigidly fixed to the ground or a tabletop - while the other end is connected to an **endeffector** - for example, a gripper - for interaction with the environment.
 
 ![ur_manipulator.svg](../assets/img/ur_manipulator.svg "Universal Robotics 6 joint manipulator with gripper (https://www.universal-robots.com/plus/urplus-components/handling-grippers/rg2-gripper/)"){: .center-image}
 
+Fixed-base manipulators are a good place to start learning about kinematics, dynamics and control; much of the theory translates to legged robots, with the main difference being that **manipulators are inherently stable** (can't fall over).
+
+Consider a simple grasping task shown below; the three key components of manipulator control we'll go over are manipulator **forward kinematics**, endeffector **path planning** and manipulator **inverse kinematics**.
+
+![ur_pipeline.svg](../assets/img/ur_pipeline.svg "Manipulator grasping control pipeline in terms of components"){: .center-image }
+
+These form a sort-of **closed loop control** - starting from forward kinematics to determine where the gripper is in space, followed by path planning and inverse kinematics for manipulator trajectory planning, and then joint-level control to move individual joints according to the plan.
+
+In this post we'll start with forward kinematics, learning how to parameterize the manipulator geometry based on a standardized form so that we can compute the pose of each link from measured joint angles.
 
 # Forward (Direct) Kinematics
 
@@ -37,7 +41,7 @@ respect to the base in terms of the joint variables.
 > The term **forward** in this context refers to a function which takes the joint state as input and outputs the Cartesian state of link(s). More generally, we say that forward kinematics maps from the *joint space* to the so-called *operational space* where we "operate on" (interact with) the environment. As we'll introduce later, the opposite is **inverse** kinematics which maps from the operational space back into the joint space.
 >
 > The term **direct** refers to the fact that we're mapping from joint *positions* to operational space Cartesian *pose*. It's also useful to work with **differential** kinematics, which maps joint *velocities* to Cartesian *twist* (linear + angular velocity).
-
+>
 > So, in total, we have four different ways of looking at manipulator kinematics - **forward direct**, **forward differential**, **inverse direct**, and **inverse differential**. We'll talk about forward direct kinematics in this post and forward differential kinematics in the next post. We'll leave all of inverse kinematics to a future post.
 
 ## Problem setup
