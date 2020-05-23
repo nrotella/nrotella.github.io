@@ -44,9 +44,28 @@ Note that the OpenGL functionality we'll be using here is mostly part of the [Fi
 
 ### Python IDE
 
-Before we dive into an example of using Qt + OpenGL to create a simple application, you might be wondering what tools to use for developing in python.  There are [many, many, many articles](https://www.google.com/search?q=best+python+ide&rlz=1C1GCEA_enUS780US780&oq=best+python+ide&aqs=chrome..69i57j0l5.2479j0j7&sourceid=chrome&ie=UTF-8){:target="_blank"} dedicated to this in far greater detail than I could ever provide, but I will say that good ol' Emacs can be made into [a great lightweight IDE](https://realpython.com/emacs-the-best-python-editor/){:target="blank_"} with some work (as all things involving Emacs require), with the upside that it integrates nicely into your workflow if you already use Emacs for everything else.
+Before we dive into an example of using Qt + OpenGL to create a simple application, you might be wondering what tools to use for developing in python.  There are [many, many, many articles](https://www.google.com/search?q=best+python+ide&rlz=1C1GCEA_enUS780US780&oq=best+python+ide&aqs=chrome..69i57j0l5.2479j0j7&sourceid=chrome&ie=UTF-8){:target="_blank"} dedicated to this in far greater detail than I could ever provide, but I will say that good ol' Emacs can be made into [a great lightweight IDE](https://realpython.com/emacs-the-best-python-editor/){:target="blank_"} with some work (as all things involving Emacs require), with the upside that it integrates nicely into your workflow if you already use Emacs for everything else. I'll detail my Emacs setup a little below.
 
 If you're transitioning to python from Matlab and looking for something similar, [Spyder](https://pythonhosted.org/spyder/installation.html){:target="blank_"} is a good choice and comes paired with other tools in a few python distributions.  Having developed in C/C++ using JetBrains' CLion, I've been tempted to try [PyCharm](https://www.jetbrains.com/pycharm/){:target="blank_"} which I've heard great things about (it's not free unless you're a student, though).
+
+#### Emacs for Python
+
+There are lots of great packages within the Emacs ecosystem for Python development, but I've been keen on [Elpy](https://github.com/jorgenschaefer/elpy) lately; you can find out more about it [here](http://elpy.readthedocs.io/en/latest/ide.html). To get Elpy working with python3 instead of python2, check out [this thread for instructions](https://emacs.stackexchange.com/questions/16637/how-to-set-up-elpy-to-use-python3).
+
+Elpy comes with some great features built-in like auto-completion, but you may want to extend it with some other packages. To see what's currently integrated, open Emacs and run ```M-x elpy-config``` which should give you a small interface to check what's installed. If you want to take your setup even further, you can follow [this great guide](https://realpython.com/blog/python/emacs-the-best-python-editor/) to eg enable flyspell for better syntax checking and so on.
+
+Very importantly, Elpy uses [Flake8](https://realpython.com/blog/python/emacs-the-best-python-editor/) for syntax checking and can be configured be editing the file ```~/.flake8``` (may not yet exist, if not then create it). For example, Flake8 highlights a lot of minor syntax errors which can get annoying, so you can add to this config file:
+
+```bash
+[flake8]
+max-line-length = 99
+max-doc-length = 79
+ignore = E2,E302,E41,E303
+```
+
+We also set the line length to 99 and docstring length to 79, as [recommended by python.org](https://www.python.org/dev/peps/pep-0008/#maximum-line-length) although standard python libraries use more restrictive lengths.
+
+Finally, as a side note, if anything in your Emacs setup requires you to evaluate lisp expressions in your "scratch" buffer, don't panic - check out [this page](https://www.gnu.org/software/emacs/manual/html_node/emacs/Lisp-Interaction.html) for help on how to do that. The "scratch" buffer can be easily accessed within Emacs with ```CTRL-X LEFTARROW``` from your main buffer.
 
 # Hello, OpenGL!
 
