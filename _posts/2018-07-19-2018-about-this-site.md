@@ -7,7 +7,7 @@ tags: [documentation,sample]
 image: html.jpg
 ---
 
-I've already fallen waaaaay behind what I was planning in terms of publishing posts on the python robot simulator I was working on, so instead I'm going to make a much easier post so that I actually get something out there.  It feels like half the battle of having a blog is getting in the habit of posting regularly, especially on days like today when scrambling to finish a huge post doesn't sound too appealing.
+I've already fallen waaaaay behind what I was planning in terms of publishing technical posts on robotics, so instead I'm going to make a much easier post so that I actually get something out there.  It feels like half the battle of having a blog is getting in the habit of posting regularly, especially on days like today when scrambling to finish a huge post doesn't sound too appealing.
 
 So, for a the past five years, I've actively been avoiding making a personal webpage because I was able to use [my lab's page](http://www-clmc.usc.edu/Main/NickRotella){:target="blank_"} and because, even though I'd taken a pretty comprehensive (if only surface-level) [course in web technologies](http://cs-server.usc.edu:45678/courseinfo.html){:target="_blank"}, I found the task to be daunting.  When I finally decided to *bite the bullet* (apparently this phrase dates from an 1891 novel, never stopped to think about it before) I was faced with the choice of either using my seriously-lapsed web development skills to build something from scratch, or stick with a nice WordPress theme - or so I thought.
 

@@ -7,7 +7,9 @@ tags: [tutorial,python,qt,opengl,robotsim]
 image: opengl_grid.png
 ---
 
-In this tutorial, we'll pick up where we left off on incrementally writing a simple robot simulator in python using Qt and OpenGL. Last time, we discussed how to install these libraries and walked through a simple interactive cube GUI; check out the previous tutorial or find the script [here](../download/HelloOpenGL.py).
+In this tutorial, we'll pick up where we left off on [learning to render graphics using OpenGL](https://nrotella.github.io/journal/first-steps-python-qt-opengl.html) and start incrementally writing a simple robot simulator in python using Qt and OpenGL. Last time, we discussed how to install these libraries and walked through a simple interactive cube GUI; check out the previous tutorial or find the script [here](../download/HelloOpenGL.py).
+
+I'm starting this as a fun side project for me to become a better python developer while creating robotics "mini lectures" paired with example code. I'm a strong believer in open-source software and education, and have benefitted from countless blogs like this one in the past. Plus, it gives me the opportunity to keep some lesser-used robotics knowledge fresh in my mind, since I've been working more on perception than control lately. I hope someone out there can learn from this blog as I pass the knowledge along :)
 
 * Table of contents:
 {:toc}
