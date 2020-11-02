@@ -20,7 +20,7 @@ Much of the information in this post was gleaned from the fantastic [Learning th
 
 Before we dive into the main controllers in ArduCopter and their implementations, let's take a moment to better understand flight dynamics and how a robot like a quadrotor is controlled at a high level. Consider the quadcopter (or *quadrotor*, or less specifically, *drone* or *UAV*) below:
 
-![quadcopter.png](../assets/img/quadcopter.png "Quadcopter"){: .center-image}
+![quadcopter_hover.png](../assets/img/quadcopter_hover.png "Quadcopter hovering with equal thrust forces"){: .center-image}
 
 The *inputs* to the system are the four rotor thrusts, which can be controlled independently. We can consider the *state* of the system to be the three-dimensional **pose** (position + orientation) and **twist** (linear + angular velocity). In the absence of external forces (disturbances like wind, for example), the total thrust from the four rotors in the example above balances the weight of the airframe and keeps the drone hovering in place.
 
@@ -28,7 +28,9 @@ The interesting thing about controlling a multirotor system like the one shown i
 
 In order for our control inputs (rotor thrusts) to affect the horizontal position of the drone, we need to change its orientation such that the thrust axes point at least partially in the direction we want to move - thereby allowing us to create force which accelerates the drone in that direction.
 
-In order to reorient the drone, we must create a *moment* or *torque* around its center of mass, which results from an imbalance in thrust on opposite sides of the airframe as shown below. As the airframe rotates around its center of mass, the axes along which we can create thrust are changing. We reorient the drone so that a component of the applied thrust is now acting in the horizontal direction, causing the drone to accelerate horizontally. In other words, while vertical position can be controlled simply by modifying the (equal) rotor thrusts, **controlling horizontal position requires controlling the orientation of the airframe.**
+![quadcopter_moment.png](../assets/img/quadcopter_moment.png "Quadcopter rolling due moment from imbalanced thrusts"){: .center-image}
+
+In order to reorient the drone, we must create a *moment* ($$M$$) or *torque* around its center of mass, which results from an imbalance in thrust on opposite sides of the airframe as shown below. As the airframe rotates around its center of mass, the axes along which we can create thrust are changing. We reorient the drone so that a component of the applied thrust is now acting in the horizontal direction, causing the drone to accelerate horizontally. In other words, while vertical position can be controlled simply by modifying the (equal) rotor thrusts, **controlling horizontal position requires controlling the orientation of the airframe.**
 
 We thus see that controlling the orientation - or *attitude* as its more commonly known in this field - is a prerequisite for controlling position/velocity. As we'll see, indeed the position control modes build on top of the attitude controller, and then flight modes build on top of these two core controllers. 
 
