@@ -4,7 +4,7 @@ title: "Humanoid Model Predictive Control"
 author: "Nick Rotella"
 categories: journal
 tags: [robotics, controls, humanoids]
-image: 
+image: herzog_humanoid_mpc.png
 ---
 
 In this post, we'll move from discussing MPC at a high level to introducing humanoid robot dynamic models used for MPC, followed by the momentum MPC problem which motivated this series of posts. For the time being, the content of this post will laregly be copied from my PhD notes without much editing; figures and more context to come soon.
@@ -23,13 +23,58 @@ Most simplified-model-based approaches to humanoid locomotion (specifically, cen
 * The robot is treated as a point mass, ie its angular momentum is neglected
 * The center of mass (COM) is constrained to move within a plane (typically the plane parallel to the floor, forcing constant-height motion)
 
-These assumptions give us a linear model which can be readily used for MPC, however at the cost of imposing quasi-static motion and very simple terrain. In reality, there is a wide spectrum of simplified models which can be used for different kinds of motion, and in fact, it's arguable that the best approaches should combine many different simplified models depending on the task or terrain at hand. Nonetheless, the LIPM remains a powerful tool in that it linearizes the robot's full dynamics and thus allows using linear MPC methods.
+These assumptions give us a linear model which can be readily used for MPC, however at the cost of imposing quasi-static motion and very simple terrain. 
+
+![lipm_zmp.gif](../assets/gif/lipm_zmp.gif "ZMP-based MPC for humanoid walking"){: .center-image width="400px"}
+
+In reality, there is a wide spectrum of simplified models which can be used for different kinds of motion, and in fact, **it's arguable that the best approaches should combine many different simplified models depending on the task or terrain at hand**. Nonetheless, the LIPM remains a powerful tool in that it linearizes the robot's full dynamics and thus allows using linear MPC methods.
+
+## Full Dynamics
+
+![ARM_full.svg](../assets/img/ARM_full.svg "Dual-arm manipulator (ARM robot)"){: .center-image width="400px"}
+
+The dynamics of a *fixed-base* manipulator in contact with the environment at its endeffector take the form
+
+$$
+M(q)\ddot{q} + h(q,\dot{q}) = \tau + J^{T}\lambda
+$$
+
+where $$\ddot{q}\in R^{n}$$ is the vector of joint accelerations, $$\lambda\in R^{6m}$$ is the vector of endeffector contact wrenches and $$\tau\in R^{n}$$ is the vector of joint torques; $$n$$ denotes the number of DoFs and $$m$$ denotes the number of endeffector contact points.  The matrix $$M(q)\in R^{n\times n}$$ is the configuration-dependent mass inertia matrix of the robot, and $$h(q,\dot{q})\in R^{n}$$ is the configuration-dependent vector of nonlinear terms (Coriolis, centripetal and gravity forces) acting on the robot. $$J\in R^{6m\times n}$$ denotes the endeffector Jacobian which (by the principle of virtual work) relates contact wrenches applied at the endeffector to joint torques through its transpose.  
+
+![hermes_full_dynamics.svg](../assets/img/hermes_full_dynamics.svg "Floating-base humanoid full dynamics"){: .center-image width="400px"}
+
+In contrast to fixed-base robots, floating base robots such as quadrupeds and humanoids have an additional six DoFs corresponding to the pose of the base (root) link; these robots are thus *underactuated*.  The dynamics become
+
+$$
+M(q)\ddot{q} + h(q,\dot{q}) = S^{T}\tau + J^{T}\lambda
+$$
+
+where the matrix $$S\in R^{n+6\times n}$$ is a selector matrix which encodes the underactuation of the system.  Joint torques corresponding to a desired joint plus floating base acceleration vector $$\ddot{q}\in R^{n+6}$$ thus cannot be solved directly from Eq ($$\ref{eq:floating_base_dynamics}$$); we require an additional six constraints to determine $$\tau$$.  These come from contact constraints in the form
+
+$$
+J_{c}\ddot{q} + \dot{J}_{c}\dot{q} = 0
+$$
+
+Here, $$J_{c}\in R^{m_{c}\times n+6}$$ denotes the portion of the Jacobian corresponding to the $$m_{c}$$ endeffectors assumed to be in rigid contact with the ground.  A single planar foot contact adds six constraints; when both feet are in planar contact with the ground, the robot becomes overactuated which allows for redundancy in inverse dynamics.  The dynamics of a floating base robot thus vary over time as contacts are made and broken, resulting in discrete changes in the number of constrained degrees of freedom over time
 
 ## Momentum Dynamics
 
-While the full robot dynamics are highly nonlinear and simplified model dynamics (for example, the LIPM) are very restrictive, there is a sort-of intermediate model which has shown good results for dynamic locomotion tasks: the so-called **momentum dynamics** of the system.
+While the full robot dynamics are highly nonlinear and simplified model dynamics (for example, the LIPM) are very restrictive, there is a sort-of intermediate model which has shown good results for dynamic locomotion tasks: the so-called **momentum (centroidal) dynamics** of the system. As shown in *Herzog et al., 2014*, the above full dynamics can be decomposed into the actuated and unactuated (floating base) dynamics, respectively:
+
+$$
+\begin{align*}
+M_{u}(q)\ddot{q} + h_{u}(q,\dot{q}) &= \tau + J_{c,u}^{T}\lambda\\
+M_{l}(q)\ddot{q} + h_{l}(q,\dot{q}) &= J_{c,l}^{T}\lambda
+\end{align*}
+$$
+
+The first set of equations above are the rate of change of linear and angular momentum expressed in terms of joint variables, however this can equivalently be written in terms of the contact forces and torques acting on the robot.
+
+![hermes_unactuated_dynamics.svg](../assets/img/hermes_unactuated_dynamics.svg "Centroidal dynamics of a humanoid robot"){: .center-image width="600px"}
 
 Essentially, the momentum dynamics are the equations of motion governing rate of change of momenta due to summed forces and torques acting on the entire robot. These are not *simplified* but instead **reduced** because they are actually just a reduction of the full multibody dynamics which focuses on the center of mass and angular motion rather than the motions of all individual joints.
+
+![momentum.png](../assets/img/momentum.png "Humanoid momentum (centroidal) dynamics"){: .center-image width="400px"}
 
 The momentum dynamics of a humanoid robot in double support can be written in state-space form as
 
@@ -45,7 +90,11 @@ where $$m$$ is the mass of the robot, $$c$$ denotes the center of mass (CoM) pos
 
 ### Humanoid Stability
 
-Stability (in a general sense) of a humanoid robot is guaranteed by constraining the center of pressure (CoP) to lie strictly within the support polygon defined by the feet in contact with the ground.  As long as the feet are coplanar then the CoP is well-defined and it can be expressed in terms of the momentum dynamics as
+Stability (in a general sense) of a humanoid robot is guaranteed by constraining the **center of pressure (CoP)** to lie strictly within the support polygon defined by the feet in contact with the ground. Recall that we're free to sum forces and moments acting at the foot contact surface about any point in space; **the CoP is a special point at which the net moment is perpendicular to the contact surface**, meaning the foot cannot topple but only rotate.
+
+![cop.svg](../assets/img/cop.svg "Center of pressure contact wrench"){: .center-image width="300px"}
+
+As long as the feet are coplanar then the CoP is well-defined and it can be expressed in terms of the momentum dynamics as
 
 $$
 \begin{align*}
