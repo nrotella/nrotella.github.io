@@ -78,6 +78,39 @@ $$
 
 where we introduce $$\mathbf{q}=[q_{0},q_{1},\ldots,q_{n-1}]$$ to denote the *vector* of all joint states.
 
+### RobotState class
+
+Before we can go any further, we'll need to describe the **state** of the robot used for kinematics calculations. The robot state consists of both the *current* configuration and the *desired* configuration, the latter of which comes from motion planning (eg inverse kinematics).
+
+We'll consider the state of the robot to be simply (for now) the current joint state, the desired joint state and the parameters which define the physical structure of the robot. We'll define the parameters according to a standard known as the *Denavit-Hartenberg* system later in this tutorial.
+
+```python
+class RobotState(object):
+    """ Class storing robot geometry and all joint states of the robot.
+
+    This class stores the state of the robot, which is considered to be arrays of the current and 
+    desired joint values and their derivatives, initialized from an input set of DH parameters 
+    which define the robot geometry.
+    
+    """
+    
+    def __init__(self, robot_params):
+        """ Initialize the robot state from Denavit-Hartenberg (DH) parameters.
+
+        Constructor which initializes the robot state, storing the DH parameters and parsing the
+        joint state values into arrays of JointState type.
+        
+        Args:
+            robot_params (RobotParams): Set of DH parameters describing robot geometry.
+
+        """
+        self.robot = robot_params
+        self.joint_state = [JointState(self.robot.default_th[i], self.robot.dh_d[i])
+                            for i in range(self.robot.n_dofs)]
+        self.joint_state_des = [JointState(self.robot.default_th[i], self.robot.dh_d[i])
+                                for i in range(self.robot.n_dofs)]
+```
+
 ## Defining link frames
 
 In the previous section, we described loosely how direct kinematics allows us to compute the homogeneous transform of the endeffector - or any frame in between - relative to the base. We also
@@ -125,6 +158,61 @@ In total, there are $$n$$ links and $$n+1$$ frames (one at each joint and one at
 
 Note that we consider **each joint to have one DOF**, meaning only one of $$\theta_{i}$$ and $$d_{i}$$ can be variable for each link.  More complex joints having multiple DOFs (eg spherical joints like your shoulder) are treated as combinations of single-DOF joints sharing the same origin. More on that later.
 
+#### JointState class
+
+Now that we have the full robot state defined in terms of the joint state, we need to define what exactly the state of each individual joint is. As introduced above, each joint is either **revolute**, meaning $$\theta$$ (```th``` in code) is variable, or **prismatic**, meaning $$d$$ (```d``` in code) is variable. We thus store variables for both types of joints in our ```JointState``` class, along with variables for their derivatives. Additionally, we store the **input** or **effort** for the joint, ```u```, which will be provided by a controller.
+
+```python
+class JointState(object):
+    """ Class storing the state of an individual robot joint.
+
+    Following the DH parameter system for describing robot geometry, this class stores the joint 
+    type (revolute or prismatic) as well as the value of each joint and its time derivatives. 
+
+    """
+    
+    def __init__(self, th, d):
+        """ Constructor initializing an individual joint state.
+
+        Initializes the state of a single joint from passed revolute and prismatic joint values,
+        storing each and their derivatives as well as the joint actuation effort.
+        
+        Args:
+            th (float): Revolute joint value, in radians.
+            d (float): Prismatic joint value, in meters.
+
+        """
+        # Joint is revolute by default.
+        self.jtype = robot_defs.JTYPE_REVOLUTE
+
+        self.th = th
+        self.thd = 0.0
+        self.thdd = 0.0
+
+        self.d = d
+        self.dd = 0.0
+        self.ddd = 0.0
+
+        self.u = 0.0
+
+    def set_th(self, val):
+        """ Set the joint angle. Needed for lambda functions. """
+        self.th = val
+
+    def set_thd(self, val):
+        """ Set the joint velocity. Needed for lambda functions. """
+        self.thd = val
+
+    def set_d(self, val):
+        """ Set the joint displacement. Needed for lambda functions. """
+        self.d = val
+
+    def set_u(self, val):
+        """ Set the actuator-applied joint torque. Needed for lambda functions. """
+        self.u = val
+```
+
+
 #### Computing link transforms
 
 In this setup, Link $$i$$ is located between Frames $$i$$ and $$i-1$$; the homogeneous
@@ -144,6 +232,19 @@ a_{i}\sin{\theta_{i}}\\
 0 & 0 & 0 & 1
 \end{pmatrix}
 $$
+
+In python we can compute this transformation matrix as follows:
+
+```python
+            # Use the homogeneous transformation for link i-1 and the incremental homogeneous
+            # transformation between link i-1 and link i frames to compute the transformation
+            # for link i:
+            joint_tf[i+1].mat = joint_tf[i].mat.dot(
+                np.array([[np.cos(th), -np.sin(th)*np.cos(alpha), np.sin(th)*np.sin(alpha), a*np.cos(th)],
+                          [np.sin(th), np.cos(th)*np.cos(alpha), -np.cos(th)*np.sin(alpha), a*np.sin(th)],
+                          [0.0, np.sin(alpha), np.cos(alpha), d],
+                          [0.0, 0.0, 0.0, 1.0]]))
+```
 
 Consider again the three-link planar arm, for which we've highlighted the homogeneous transformation between the first and second link:
 
@@ -217,7 +318,43 @@ where we introduce the notation $$c_{xy}=\cos{x}\cos{y}$$ and $$s_{xy}=\sin{x}\s
 
 ![three_link_planar_endeff.svg](../assets/img/three_link_planar_endeff.svg "Three-link planar manipulator link homogeneous transformation"){: .center-image}
 
-Whew! Let's check out some more complex manipulator structures now. Disclaimer: I copied the following diagrams from the aforementioned text (Siciliano et al) but plan to revisit this and create some nicer-looking 3d diagrams for these structures.
+Whew! Before we move on, let's introduce some python code for computing the homogeneous transformations of each link in the chain, from base to endeffector:
+
+```python
+    def compute_link_motion(self, base_tf, joint_state):
+
+        # Create the output arrays:
+        joint_tf = [tf.HomogeneousTransform() for i in range(self.robot.n_dofs + 1)]
+        link_tf = [tf.HomogeneousTransform() for i in range(self.robot.n_links + 1)]
+
+        # Compute homogeneous transformations specifying each link's pose relative to the
+        # world frame:
+        joint_tf[0].mat = base_tf.mat
+        link_tf[0].mat = joint_tf[0].mat
+
+        # We start with h_tf[1] which corresponds to link frame 0, since the base is included:
+        for i in range(self.robot.n_dofs):
+
+            # First, get the DH parameters for the link:
+            a = self.robot.dh_a[i]
+            alpha = self.robot.dh_alpha[i]
+            d = joint_state[i].d
+            th = joint_state[i].th
+
+            # Use the homogeneous transformation for link i-1 and the incremental homogeneous
+            # transformation between link i-1 and link i frames to compute the transformation
+            # for link i:
+            joint_tf[i+1].mat = joint_tf[i].mat.dot(
+                np.array([[np.cos(th), -np.sin(th)*np.cos(alpha), np.sin(th)*np.sin(alpha), a*np.cos(th)],
+                          [np.sin(th), np.cos(th)*np.cos(alpha), -np.cos(th)*np.sin(alpha), a*np.sin(th)],
+                          [0.0, np.sin(alpha), np.cos(alpha), d],
+                          [0.0, 0.0, 0.0, 1.0]]))
+            link_tf[i+1].mat = joint_tf[i+1].mat
+```
+
+This function uses the DH parameters stored in the ```RobotClass``` and iterates over the links, computing their transforms using the above theory.
+
+Now, let's check out some more complex manipulator structures now. Disclaimer: I copied the following diagrams from the aforementioned text (Siciliano et al) but plan to revisit this and create some nicer-looking 3d diagrams for these structures.
 
 #### Case study 2: spherical arm
 
@@ -242,6 +379,256 @@ The *anthropomorphic arm* is essentially a vertical two-link planar arm (latter 
 | 1 | θ<sub>1</sub> | 0 | π/2 | 0 |
 | 2 | θ<sub>2</sub> | 0 | 0 | a<sub>2</sub> |
 | 3 | θ<sub>3</sub> | 0 | 0 | a<sub>3</sub> |
+
+# Visualizing the robot with OpenGL
+
+We now know how to mathematically describe the robot in terms of link frames, and have introduced some code to implement this description. Now, we return to the simulator itself and implement a basic ```RobotGraphics``` class to visualize the manipulator.
+
+## Graphics refactoring
+
+In the [last simulator tutorial](https://nrotella.github.io/journal/initial-simulator-graphics-opengl.html), we rendered a simple ground plane, added axes and vector graphics, and set up a basic keyboard-controlled camera:
+
+![opengl_grid_axes.gif](../assets/gif/opengl_grid_axes.gif "OpenGL Grid and Axes"){: .center-image}
+
+
+Before we add robot graphics to this simulator, let's do a little refactoring to make our graphics code more modular. We move the [GroundGraphics](https://github.com/nrotella/python-robot-sim/blob/master/simulator.py#L14-L114), [AxesGraphics](https://github.com/nrotella/python-robot-sim/blob/master/simulator.py#L158-L175) and [VectorGraphics](https://github.com/nrotella/python-robot-sim/blob/master/simulator.py#L117-L155) classes from the main simulator file into a new ```graphics_objects.py``` file. Eventually, we could even move everything to a dedicated graphics module as it becomes more complex.
+
+In this new file we'll also add a class called ```GraphicsOptions``` to store any user-configurable options related to graphics that we add. For example, we anticipate wanting the ability to switch to a wireframe view, change the alpha transparency, and visualize robot joint/link frames all on the fly:
+
+```python
+class GraphicsOptions(object):
+    """ Class for setting graphics options, normally via user input. """
+
+    def __init__(self, n_dofs):
+        self.n_dofs = n_dofs
+
+        self.draw_wireframe = False
+
+        self.use_alpha = False
+
+        self.draw_joint_frame = np.array((self.n_dofs+1)*[False])
+        self.draw_joint_frame[0] = True  # always draw the base frame
+
+    def set_draw_wireframe(self, draw_bool):
+        self.draw_wireframe = draw_bool
+
+    def toggle_draw_wireframe(self):
+        self.draw_wireframe = not self.draw_wireframe
+
+    def set_use_alpha(self, alpha_bool):
+        self.use_alpha = alpha_bool
+
+    def toggle_use_alpha(self):
+        self.use_alpha = not self.use_alpha
+
+    def set_draw_joint_frame(self, joint_id, draw_bool):
+        if joint_id >= 0 and joint_id <= self.n_dofs+1:
+            self.draw_joint_frame[joint_id] = draw_bool
+
+    def toggle_draw_joint_frame(self, joint_id):
+        if joint_id >= 0 and joint_id < self.n_dofs+1:
+            self.draw_joint_frame[joint_id] = not self.draw_joint_frame[joint_id]
+
+    def toggle_draw_all_joint_frames(self):
+        # If all the frames are currently drawn, turn them all off:
+        if np.all(self.draw_joint_frame):
+            for i in range(self.n_dofs+1):
+                self.draw_joint_frame[i] = False
+            self.draw_joint_frame[0] = True  # always draw the base frame
+        # Otherwise, turn them all on:
+        else:
+            for i in range(self.n_dofs+1):
+                self.draw_joint_frame[i] = True
+```
+
+We'll create an instance of this class in the simulator file and connect [keypress callbacks in the usual place](https://github.com/nrotella/python-robot-sim/blob/master/simulator.py#L247-L290) to the different graphics options, allowing the visualization to change with keyboard input:
+
+```python
+	    .
+	    .
+	    .
+
+            elif event.key() == QtCore.Qt.Key_T:
+                self.graphics_options.toggle_draw_wireframe()
+
+            elif event.key() == QtCore.Qt.Key_0:
+                self.graphics_options.toggle_draw_all_joint_frames()
+
+            elif event.key() == QtCore.Qt.Key_1:
+                self.graphics_options.toggle_draw_joint_frame(1)
+
+            elif event.key() == QtCore.Qt.Key_2:
+                self.graphics_options.toggle_draw_joint_frame(2)
+
+            elif event.key() == QtCore.Qt.Key_3:
+                self.graphics_options.toggle_draw_joint_frame(3)
+
+            elif event.key() == QtCore.Qt.Key_4:
+                self.graphics_options.toggle_draw_joint_frame(4)
+
+            elif event.key() == QtCore.Qt.Key_5:
+                self.graphics_options.toggle_draw_joint_frame(5)
+
+            elif event.key() == QtCore.Qt.Key_6:
+                self.graphics_options.toggle_draw_joint_frame(6)
+
+            elif event.key() == QtCore.Qt.Key_7:
+                self.graphics_options.toggle_draw_joint_frame(7)
+
+            elif event.key() == QtCore.Qt.Key_8:
+                self.graphics_options.toggle_draw_joint_frame(8)
+
+            elif event.key() == QtCore.Qt.Key_9:
+                self.graphics_options.toggle_draw_joint_frame(9)
+```
+
+Finally, we introduce a number of defined constants for rendering in a new ```graphics_defs.py``` file. These include sizes and colors for links, joints and so on.
+
+## The RobotGraphics class
+
+Now we're ready to add the main class used to visualize the manipulator into our ```graphics_objects.py``` file. We start with the class definition:
+
+```python
+class RobotGraphics(object):
+    """ Class for rendering the robot geometry.
+
+    This class implements visualization of the robot geometry from kinematics and graphics
+    options. Links and joints are rendered using quadrics (cylinders). Link/joint frames 
+    are rendered as AxesGraphics objects and can be toggled per frame via graphics options.
+    All graphics have their sizes, colors, etc specified in the graphics_defs file as
+    defined constants used for rendering.
+
+    """
+
+    def __init__(self):
+        self.quadric = GLU.gluNewQuadric()
+        GLU.gluQuadricNormals(self.quadric, GLU.GLU_SMOOTH)  # create Smooth Normals
+        GLU.gluQuadricTexture(self.quadric, gl.GL_TRUE)  # create Texture Coords
+        GLU.gluQuadricDrawStyle(self.quadric, GLU.GLU_FILL)
+        self.vec_graphics = VectorGraphics()
+        self.axes_graphics = AxesGraphics()
+```
+
+where we create quadrics for rendering primitives like cylinders, as well as more complex graphics we defined last time (axes and vectors). These will be reused for rendering different portions of the robot geometry below:
+
+```python
+    def render(self, kinematics, options):
+        """ Render the robot graphics given the current kinematic state and graphics options.
+
+	Renders the robot graphics given an updated kinematics class instance and options for
+	visualization set from user input.
+
+	Args:
+	    kinematics (Kinematics): Updated robot kinematics object
+	    options (GraphicsOptions): Graphics rendering options object
+
+	Returns:
+	    (None)
+ 
+	 """
+        # Change to wireframe graphics if desired:
+        if options.draw_wireframe:
+            GLU.gluQuadricDrawStyle(self.quadric, GLU.GLU_LINE)
+        else:
+            GLU.gluQuadricDrawStyle(self.quadric, GLU.GLU_FILL)
+
+        if options.use_alpha:
+            gl.glEnable(gl.GL_BLEND)
+            gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
+        else:
+            gl.glDisable(gl.GL_BLEND)
+```
+
+First we check for options which specify how to render the robot graphics - these include wireframe and alpha values. We saw 
+        # Draw each link as a cylinder:
+        for i in range(1, kinematics.robot.n_links + 1):
+            link_len = np.linalg.norm(kinematics.h_tf[i].t() - kinematics.h_tf[i-1].t())
+            ang, ax = angle_axis_from_vec_dir(np.array([0.0, 0.0, 1.0]),
+                                                 (kinematics.h_tf[i].t() -
+                                                  kinematics.h_tf[i-1].t()))
+
+            gl.glPushMatrix()
+            gl.glColor4f(gdefs.LINK_COLOR_R,
+                         gdefs.LINK_COLOR_G,
+                         gdefs.LINK_COLOR_B,
+                         gdefs.ROBOT_ALPHA)
+            gl.glTranslatef(*kinematics.h_tf[i-1].t())
+            gl.glRotate((180.0/np.pi)*ang, *ax)
+            GLU.gluCylinder(self.quadric, gdefs.LINK_CYLINDER_RAD, gdefs.LINK_CYLINDER_RAD,
+                            link_len, gdefs.CYLINDER_SLICES, gdefs.CYLINDER_STACKS)
+            gl.glPopMatrix()
+
+        # Draw each joint frame using an AxesGraphic object if desired (always draw base):
+        for i in range(kinematics.robot.n_dofs+1):
+            if options.draw_joint_frame[i]:
+                self.axes_graphics.render(kinematics.h_tf[i])
+
+        # Draw each joint as a cylinder aligned with the joint axis:
+        for i in range(1, kinematics.robot.n_dofs + 1):
+            ang, ax = angle_axis_from_vec_dir(np.array([0.0, 0.0, 1.0]),
+                                                 kinematics.h_tf[i-1].Rz())
+            gl.glPushMatrix()
+            gl.glColor4f(gdefs.JOINT_COLOR_R,
+                         gdefs.JOINT_COLOR_G,
+                         gdefs.JOINT_COLOR_B,
+                         gdefs.ROBOT_ALPHA)
+            gl.glTranslatef(*kinematics.h_tf[i-1].t())
+            gl.glRotate((180.0/np.pi)*ang, *ax)
+            gl.glTranslatef(0.0, 0.0, -0.5*gdefs.JOINT_CYLINDER_LEN)
+            GLU.gluCylinder(self.quadric, gdefs.JOINT_CYLINDER_RAD, gdefs.JOINT_CYLINDER_RAD,
+                            gdefs.JOINT_CYLINDER_LEN, gdefs.CYLINDER_SLICES, gdefs.CYLINDER_STACKS)
+            #gl.glDisable(gl.GL_BLEND)
+            gl.glPopMatrix()
+
+            # Draw a disk for the top of the joint actuator:
+            gl.glPushMatrix()
+            gl.glColor4f(gdefs.JOINT_COLOR_R,
+                         gdefs.JOINT_COLOR_G,
+                         gdefs.JOINT_COLOR_B,
+                         gdefs.ROBOT_ALPHA)
+            gl.glTranslatef(*kinematics.h_tf[i-1].t())
+            gl.glRotate((180.0/np.pi)*ang, *ax)
+            gl.glTranslatef(0.0, 0.0, 0.5*gdefs.JOINT_CYLINDER_LEN)
+            GLU.gluDisk(self.quadric, 0.0, gdefs.JOINT_CYLINDER_RAD,
+                        gdefs.DISK_SLICES, gdefs.DISK_STACKS)
+            gl.glPopMatrix()
+
+            # Draw a disk for the bottom of the joint actuator:
+            gl.glPushMatrix()
+            gl.glColor4f(gdefs.JOINT_COLOR_R,
+                         gdefs.JOINT_COLOR_G,
+                         gdefs.JOINT_COLOR_B,
+                         gdefs.ROBOT_ALPHA)
+            gl.glTranslatef(*kinematics.h_tf[i-1].t())
+            gl.glRotate((180.0/np.pi)*ang, *ax)
+            gl.glTranslatef(0.0, 0.0, -0.5*gdefs.JOINT_CYLINDER_LEN)
+            GLU.gluDisk(self.quadric, 0.0, gdefs.JOINT_CYLINDER_RAD,
+                        gdefs.DISK_SLICES, gdefs.DISK_STACKS)
+            gl.glPopMatrix()
+
+        # Draw the endeffector as a sphere:
+        gl.glPushMatrix()
+        gl.glColor4f(gdefs.ENDEFF_COLOR_R,
+                     gdefs.ENDEFF_COLOR_G,
+                     gdefs.ENDEFF_COLOR_B,
+                     gdefs.ROBOT_ALPHA)
+        gl.glTranslatef(*kinematics.h_tf[-1].t())
+        GLU.gluSphere(self.quadric, gdefs.ENDEFF_SPHERE_RAD,
+                      gdefs.SPHERE_SLICES, gdefs.SPHERE_STACKS)
+        gl.glPopMatrix()
+
+        # Draw the link centers of mass as spheres:
+        for i in range(kinematics.robot.n_links + 1):
+            gl.glPushMatrix()
+            gl.glColor4f(gdefs.LINK_COM_COLOR_R,
+                         gdefs.LINK_COM_COLOR_G,
+                         gdefs.LINK_COM_COLOR_B,
+                         gdefs.ROBOT_ALPHA)
+            gl.glTranslatef(*(kinematics.link_com[i]))
+            GLU.gluSphere(self.quadric, gdefs.LINK_COM_SPHERE_RAD,
+                          gdefs.SPHERE_SLICES, gdefs.SPHERE_STACKS)
+            gl.glPopMatrix()
+```
 
 # Wrapping up
 
