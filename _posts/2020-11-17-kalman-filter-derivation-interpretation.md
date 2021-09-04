@@ -7,7 +7,7 @@ tags: [mathematics, controls, estimation]
 image: 
 ---
 
-This post will detail a first-principles derivation of the discrete-time Kalman Filter, beginning with some probabalistic background and ending with a linear-algebraic interpretation. We'll also take a look at some practical considerations of applying the Kalman Filter - what if the state space is nonlinear? How are rotational states - for exampling, those belonging to $$SO(2)$$ or $$SO(3)$$ - handled?
+This post will detail a first-principles derivation of the discrete-time Kalman Filter, beginning with some probabalistic background and ending with a linear-algebraic interpretation. We'll also take a look at some practical considerations of applying the Kalman Filter - what if the state space is nonlinear? How are rotational states - for example, those belonging to $$SO(2)$$ or $$SO(3)$$ - handled?
 
 The majority of this content comes from my personal notes; it's a bit denser than other posts, but I find this the most satisfying derivation and insightful interpretation.
 
@@ -548,6 +548,8 @@ K = PH^{T}\left(HPH^{T}+R\right)^{-1}
 $$
 
 which, as we've seen above, is a **right pseudoinverse** solving the relationship $$Hx=z$$ between the state $$x$$ and the measurement $$z$$. The solution uses $$P^{1/2}$$ as a **weighting matrix** and $$R^{1/2}$$ as a **regularization matrix**.
+
+![kalman_gain.svg](../assets/img/kalman_gain.svg "Least-squares interpretation of the Kalman Gain"){: .center-image width="400px"}
 
 By weighting the least-squares norm using the state covariance matrix $$P$$, **states with higher variance have more impact on the gain**; small changes in these states cause larger changes in the measurement.
 
