@@ -4,9 +4,6 @@ title: Home
 ---
 
 <head>
-  <script>
-  window.location.href = '{{ github.site.url }}/index.html#';
-  </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="assets/css/academicons.min.css"/>
 </head>
@@ -19,7 +16,7 @@ title: Home
     </h1>
     <img src="{{ site.github.url }}/assets/img/headshot.png" class="headshot">
     <p>
-      I'm a robotics software engineer and research scientist currently working at <a href="https://ainstein.ai/" target="_blank">Ainstein</a> on sensor fusion and sensor-based control; my work is highly multidisciplinary and involves using RADAR, LIDAR, cameras and other sensors for autonomous applications, including drones and self-driving vehicles.  In 2018, I completed my PhD in Computer Science in the <a href="http://www-clmc.usc.edu/Main/HomePage" target="_blank">Computational Learning and Motor Control (CLMC) Lab</a> at the <a href="http://www.usc.edu" target="_blank">University of Southern California</a>, in collaboration with the <a href="https://am.is.tuebingen.mpg.de/ target="_blank"">Autonomous Motion Department</a> at the Max Planck Institute for Intelligent Systems.  My research focused on solving a broad range of problems in humanoid robotics; you can read about it in my thesis, <a href="{{ site.github.url }}/download/NicholasRotellaThesis.pdf" target="_blank">Estimation-Based Control for Humanoid Robots</a>.
+      I'm a software engineer and researcher currently working at <a href="https://seegrid.com" target="_blank">Seegrid</a> on autonomous mobile robotics as a founding member of the <a href="https://roboticsandautomationnews.com/2021/05/31/seegrid-creates-blue-labs-research-and-development-group/43557/" target="_blank">Blue Labs</a> research and development team. In 2018, I completed my PhD in Computer Science in the <a href="http://www-clmc.usc.edu/Main/HomePage" target="_blank">Computational Learning and Motor Control (CLMC) Lab</a> at the <a href="http://www.usc.edu" target="_blank">University of Southern California</a>, in collaboration with the <a href="https://am.is.tuebingen.mpg.de/ target="_blank"">Autonomous Motion Department</a> at the Max Planck Institute for Intelligent Systems.  My research focused on solving a broad range of problems in humanoid robotics; you can read about it in my thesis, <a href="{{ site.github.url }}/download/NicholasRotellaThesis.pdf" target="_blank">Estimation-Based Control for Humanoid Robots</a>.
     </p>
     <p>
       Prior to defending my thesis, I earned a M.Sc. degree in Computer Science with a specialization  in Intelligent Robotics from USC in 2014.  My undergraduate studies earned me a B.Sc. degree in Mechanical Engineering with an emphasis on control systems from <a href="http://www.cooper.edu" target="_blank">The Cooper Union for the Advancement of Science and Art</a> in 2012. Having spent the summer of 2011 performing computational neuroscience research in the <a href="http://www.joefrancislab.com/" target="_blank">Joe Francis Lab</a> at SUNY Downstate, I decided to pursue graduate studies in robotics as the field combined my interests in neuroscience and mechatronics.
@@ -147,15 +144,29 @@ title: Home
 
 <!-- Pagination links -->
 <div class="pagination">
-  {% if paginator.next_page %}
-    <a class="pagination-button pagination-active" href="{{ site.github.url }}{{ paginator.next_page_path }}" class="next">{{ site.data.settings.pagination.previous_page }}</a>
+{% if paginator.total_pages > 1 %}
+<div class="pagination">
+  {% if paginator.previous_page %}
+    <a href="{{ paginator.previous_page_path | relative_url }}/index.html">&laquo; Prev</a>
   {% else %}
-    <span class="pagination-button">{{ site.data.settings.pagination.previous_page }}</span>
+    <span>&laquo; Prev</span>
   {% endif %}
 
-  {% if paginator.previous_page %}
-    <a class="pagination-button pagination-active" href="{{ site.baseurl }}{{ paginator.previous_page_path }}">{{ site.data.settings.pagination.next_page }}</a>
+  {% for page in (1..paginator.total_pages) %}
+    {% if page == paginator.page %}
+      <em>{{ page }}</em>
+    {% elsif page == 1 %}
+      <a href="{{ '/' | relative_url }}">{{ page }}</a>
+    {% else %}
+      <a href="{{ site.paginate_path | relative_url | replace: ':num', page }}/index.html">{{ page }}</a>
+    {% endif %}
+  {% endfor %}
+
+  {% if paginator.next_page %}
+    <a href="{{ paginator.next_page_path | relative_url }}/index.html">Next &raquo;</a>
   {% else %}
-    <span class="pagination-button">{{ site.data.settings.pagination.next_page }}</span>
+    <span>Next &raquo;</span>
   {% endif %}
+</div>
+{% endif %}
 </div>
