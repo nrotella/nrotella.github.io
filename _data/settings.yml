@@ -9,14 +9,14 @@ menu:
 - {name: 'About', url: 'index.html#about'}
 - {name: 'Research', url: 'index.html#research'}
 - {name: 'Teaching', url: 'index.html#teaching'}
-- {name: 'Publications', url: 'index.html#publications'}
+- {name: 'PhD Notes', url: '../download/NicholasRotellaPhDNotes.pdf'}
 - {name: 'Blog', url: 'menu/writing.html'}
 - {name: 'CV', url: '../download/NicholasRotellaCV.pdf'}
 
 # Available social icons are powered by Font Awesome, so you can use any icon that they offer
 social:
-- {icon: 'github', link: 'https://www.github.com/nrotella-ainstein'}
-- {icon: 'github-alt', link: 'https://www.github.com/nrotella'}
+- {icon: 'github', link: 'https://www.github.com/nrotella'}
+#- {icon: 'github-alt', link: 'https://www.github.com/nrotella-ainstein'}
 - {icon: 'linkedin', link: 'http://www.linkedin.com/in/nrotella'}
 - {icon: 'envelope', link: 'mailto:nicholas.rotella@gmail.com'}
 #- {icon: 'rss-square', link: '/feed.xml'}
